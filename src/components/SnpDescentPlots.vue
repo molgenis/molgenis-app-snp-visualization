@@ -13,24 +13,44 @@
         </div>
         <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
       </form>
+      <div id="plot"></div>
     </div>
   </div>
 </template>
 
 <script>
   import {mapState} from 'vuex'
+  import * as d3 from 'd3'
 
   export default {
     name: 'snp-descent-plot',
     data: function () {
       return {
         definitionFile: undefined,
-        dataFile: undefined
+        dataFile: undefined,
+        t0: undefined,
+        t1: undefined,
+        results: []
       }
     },
     methods: {
+      plot (data) {
+        const height = 200
+        const width = 800
+        const x = d3.scaleLinear(x).range([width, 0])
+        const y = d3.scaleLinear(y).range([height, 0])
+        x.domain(d3.extent(data, (d, i) => i))
+        y.domain([0, d3.max(data, d => d)])
+        const svg = d3.select('#plot')
+          .append('svg')
+          .attr('width', width + 60)
+          .attr('height', height + 60).append('g')
+        svg.selectAll('dot').data(data).enter().append('circle').attr('r', 3.5).attr('cx', (d, i) => x(i))
+          .attr('cy', d => y(d)).attr('transform', 'translate(50, 10)').attr('xIndex', (d, i) => i).attr('yVal', (d, i) => d).attr('class', 'dot')
+      },
       onProcessData () {
-        const maxLines = 100
+        this.t0 = performance.now()
+        const maxLines = 800000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
@@ -39,12 +59,32 @@
       storeDefinition (event) {
         this.definitionFile = event.target.files[0]
       },
+      compareAlleles (p1, p2) {
+        if (p1 === p2) return 2
+        if (p1 !== 'NA' && p2 !== 'NA') {
+          const p1Allele1 = p1.charAt(0)
+          const p1Allele2 = p1.charAt(1)
+          const p2Allele1 = p1.charAt(0)
+          const p2Allele2 = p1.charAt(1)
+          if (p1Allele1 === p2Allele1 || p1Allele1 === p2Allele2 || p1Allele2 === p2Allele1 || p1Allele2 === p2Allele2) {
+            return 1
+          } else {
+            return 0
+          }
+        } else {
+          return -1
+        }
+      },
       forEachLine (line) {
         const lineContent = line.split('\t')
-        console.log(lineContent)
+        const p1 = lineContent[3]
+        const p2 = lineContent[6]
+        this.results.push(this.compareAlleles(p1, p2))
       },
       onComplete () {
-        console.log('done!')
+        this.t1 = performance.now()
+        console.log(' in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconden')
+        this.plot(this.results)
       },
       readSomeLines (file, maxlines, forEachLine, onComplete) {
         const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
