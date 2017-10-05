@@ -1,24 +1,43 @@
 <template>
   <div class="row">
-    <div class="col text-center">
+    <div class="col">
       <h1>SNP descent plots</h1>
-      <input id="snpFileInput" type="file" @change="process">
-      <p>message: {{ message }}</p>
+      <form>
+        <div class="form-group">
+          <label for="devFileInput">Definition file</label>
+          <input class="form-control" id="devFileInput" type="file" @change="storeDefinition">
+        </div>
+        <div class="form-group">
+          <label for="snpFileInput">Data file</label>
+          <input class="form-control" id="snpFileInput" type="file" @change="storeData">
+        </div>
+        <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
+      </form>
     </div>
   </div>
 </template>
 
 <script>
-  import { mapState } from 'vuex'
+  import {mapState} from 'vuex'
 
   export default {
     name: 'snp-descent-plot',
+    data: function () {
+      return {
+        definitionFile: undefined,
+        dataFile: undefined
+      }
+    },
     methods: {
-      process (event) {
-        const file = event.target.files[0]
-        if (!file) return
+      onProcessData () {
         const maxLines = 100
-        this.readSomeLines(file, maxLines, this.forEachLine, this.onComplete)
+        this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
+      },
+      storeData (event) {
+        this.dataFile = event.target.files[0]
+      },
+      storeDefinition (event) {
+        this.definitionFile = event.target.files[0]
       },
       forEachLine (line) {
         const lineContent = line.split('\t')
@@ -76,6 +95,9 @@
           var slice = file.slice(offset, offset + CHUNK_SIZE)
           fr.readAsArrayBuffer(slice)
         }
+      },
+      readDefFile () {
+
       }
     },
     computed: {
