@@ -42,6 +42,9 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
+          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
+            <i class="fa fa-download" aria-hidden="true"></i>
+          </button>
         </form>
       </div>
     </div>
@@ -82,19 +85,23 @@
         const width = 1000
         const x = d3.scaleLinear(x).range([width * 0.9, 0])
         const y = d3.scaleLinear(y).range([height / 2, 0])
-        x.domain(d3.extent(data, (d, i) => i))
-        y.domain([0, d3.max(data, d => d)])
+        x.domain(d3.extent(data, d => d[0]))
+        y.domain([0, d3.max(data, d => d[1])])
         const svg = d3.select('#plot')
           .append('svg')
           .attr('width', width)
           .attr('height', height).append('g')
+          .attr('id', 'svg-plot')
         const yAxis = d3.axisLeft(y).scale(y)
           .tickFormat(function (d) {
             return d
           }).ticks(2)
-        svg.append('g').attr('transform', 'translate(20,50)').attr('height', height).call(yAxis)
-        svg.selectAll('dot').data(data).enter().append('circle').attr('r', 1).attr('cx', (d, i) => x(i))
-          .attr('cy', d => y(d) + ((Math.random() - 0.5) * 20)).attr('transform', 'translate(21, 50)')
+        svg.append('g').attr('transform', 'translate(30,50)').attr('height', height).call(yAxis)
+        svg.selectAll('dot').data(data).enter().append('circle').attr('r', 1).attr('cx', d => x(d[0]))
+          .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20)).attr('transform', 'translate(32, 50)')
+      },
+      onDownloadButtonClick () {
+        console.log('this should trigger download')
       },
       clear () {
         this.results = []
@@ -103,7 +110,7 @@
       onProcessData () {
         this.clear()
         this.t0 = performance.now()
-        const maxLines = 1000
+        const maxLines = 10000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
@@ -139,7 +146,7 @@
         if (this.isSelectedChromosome(columns)) {
           const p1 = columns[3]
           const p2 = columns[6]
-          this.results.push(this.compareAlleles(p1, p2))
+          this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
         }
       },
       onComplete () {
