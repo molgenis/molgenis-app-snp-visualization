@@ -6,7 +6,7 @@
         <form>
           <div class="form-group">
             <label for="devFileInput">Definition file</label>
-            <input class="form-control" id="devFileInput" type="file" @change="storeDefinition">
+            <input class="form-control" id="devFileInput" type="file" @change="storeDef">
           </div>
           <div class="form-group">
             <label for="snpFileInput">Data file</label>
@@ -71,7 +71,7 @@
     name: 'snp-descent-plot',
     data: function () {
       return {
-        definitionFile: undefined,
+        defFile: undefined,
         dataFile: undefined,
         t0: undefined,
         t1: undefined,
@@ -101,6 +101,10 @@
           .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20)).attr('transform', 'translate(32, 50)')
       },
       onDownloadButtonClick () {
+//        const canvas = document.getElementById('plot-svg')
+//        const img = canvas.toDataURL('image/jpeg', 0.5)
+//        document.write('<img src="' + img + '"/>')
+        // https://gist.github.com/vicapow/758fce6aa4c5195d24be
         console.log('this should trigger download')
       },
       clear () {
@@ -110,14 +114,15 @@
       onProcessData () {
         this.clear()
         this.t0 = performance.now()
-        const maxLines = 10000
+        const maxLines = 1000000
+        this.parseDefinitionFile(this.defFile)
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
         this.dataFile = event.target.files[0]
       },
-      storeDefinition (event) {
-        this.definitionFile = event.target.files[0]
+      storeDef (event) {
+        this.defFile = event.target.files[0]
       },
       compareAlleles (p1, p2) {
         if (p1 === p2 || (p1 === 'AB' && p2 === 'BA') || (p1 === 'BA' && p2 === 'AB')) {
@@ -151,8 +156,24 @@
       },
       onComplete () {
         this.t1 = performance.now()
-        console.log(' in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconden')
+        console.log('Processing data in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
         this.plot(this.results)
+        console.log('Plotting in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
+      },
+      parseDefinitionFile (file) {
+        let defObj = {}
+        const reader = new FileReader()
+        reader.onload = function () {
+          const lines = reader.result.split('\n')
+          const columns = lines[0].split('\t')
+          columns.shift()
+          const defs = lines[1].split('\t')
+          for (var i = 0; i < columns.length; i++) {
+            defObj[columns[i]] = defs[i + 1]
+          }
+          console.log(defObj)
+        }
+        reader.readAsText(file)
       },
       readSomeLines (file, maxlines, forEachLine, onComplete) {
         const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
