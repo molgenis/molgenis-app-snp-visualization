@@ -42,16 +42,17 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
-
           <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
+          <span id="statusUpdate"><small><i><span v-model="status"> {{status}}</span></i></small><i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
         </form>
       </div>
     </div>
     <div class="row">
       <div class="col">
-        <div id="plot" class="plot-container"></div>
+        <div id="plot" class="plot-container">
+        </div>
       </div>
     </div>
   </div>
@@ -59,6 +60,9 @@
 <style>
   .plot-container {
     margin: 1rem 0;
+  }
+  #statusUpdate {
+    color: grey;
   }
 </style>
 <script>
@@ -72,6 +76,8 @@
     name: 'snp-descent-plot',
     data: function () {
       return {
+        isLoading: false,
+        status: '',
         dataFile: undefined,
         counts: {},
         t0: undefined,
@@ -82,6 +88,7 @@
     },
     methods: {
       plot (data, plotId, counts) {
+        this.status = 'Plotting...'
         const height = 300
         const width = 1000
         const plotWidth = width * 0.9
@@ -178,6 +185,8 @@
         return results
       },
       onProcessData () {
+        this.isLoading = true
+        this.status = 'Processing data'
         this.clear()
         this.t0 = performance.now()
         const maxLines = 1000000
@@ -233,11 +242,11 @@
       },
       onComplete () {
         this.t1 = performance.now()
-        console.log('Processing data in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
         for (let combination in this.$store.state.dataIndex) {
           this.plot(this.results[combination].points, combination, this.results[combination].counts)
         }
-        console.log('Plotting in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
+        this.isLoading = false
+        this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
       },
       parseDefinitionFile (event) {
         const file = event.target.files[0]
