@@ -146,7 +146,7 @@
       },
       clear () {
         this.results = {}
-        d3.select('svg').remove()
+        d3.selectAll('svg').remove()
       },
       calculatePlotCombinations (defs) {
         const keys = Object.keys(defs)
