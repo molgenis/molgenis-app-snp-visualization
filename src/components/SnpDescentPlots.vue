@@ -72,7 +72,6 @@
     data: function () {
       return {
         defFile: undefined,
-        defData: {},
         dataFile: undefined,
         t0: undefined,
         t1: undefined,
@@ -121,13 +120,12 @@
             results[`${keys[i]}-${keys[j]}`] = [defs[keys[i]], defs[keys[j]]]
           }
         }
-        this.defData = results
+        return results
       },
       onProcessData () {
         this.clear()
         this.t0 = performance.now()
-        const maxLines = 1000000
-        this.parseDefinitionFile(this.defFile)
+        const maxLines = 10000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
@@ -165,7 +163,10 @@
           const p2 = columns[6]
           this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
         } else if (columns[0] === 'Name') {
-//          console.log(columns, this.defData)
+          const parsedDefData = this.parseDefinitionFile(this.defFile)
+          console.log(parsedDefData)
+          const result = this.buildDataIndex(parsedDefData, columns)
+          console.log(result)
         }
       },
       onComplete () {
@@ -186,7 +187,8 @@
           for (var i = 0; i < columns.length; i++) {
             defObj[columns[i]] = defs[i + 1]
           }
-          self.calculatePlotCombinations(defObj)
+          console.log(self.calculatePlotCombinations(defObj))
+          return self.calculatePlotCombinations(defObj)
         }
         reader.readAsText(file)
       },
