@@ -42,6 +42,7 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
+
           <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
@@ -60,7 +61,7 @@
     margin: 1rem 0;
     border: 1px solid #dddddd;
     width: 100%;
-    height: 300px;
+    height: 1000px;
   }
 </style>
 <script>
@@ -75,7 +76,7 @@
         dataFile: undefined,
         t0: undefined,
         t1: undefined,
-        results: [],
+        results: {},
         selectedChromosome: '1'
       }
     },
@@ -108,7 +109,7 @@
         console.log('this should trigger download')
       },
       clear () {
-        this.results = []
+        this.results = {}
         d3.select('svg').remove()
       },
       calculatePlotCombinations (defs) {
@@ -125,7 +126,7 @@
       onProcessData () {
         this.clear()
         this.t0 = performance.now()
-        const maxLines = 10000
+        const maxLines = 1000000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
@@ -156,19 +157,34 @@
       forEachLine (line) {
         const columns = line.split('\t')
         if (this.isSelectedChromosome(columns)) {
-          const p1 = columns[3]
-          const p2 = columns[6]
-          this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
+          const combinationLabels = Object.keys(this.$store.state.dataIndex)
+          for (let combination of combinationLabels) {
+            const index1 = this.$store.state.dataIndex[combination].gPos1
+            const index2 = this.$store.state.dataIndex[combination].gPos2
+            const id1 = columns[index1]
+            const id2 = columns[index2]
+            this.results[combination].push([parseInt(columns[2]), this.compareAlleles(id1, id2)])
+          }
+//          const p1 = columns[3]
+//          const p2 = columns[6]
+//          this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
         } else if (columns[0] === 'Name') {
           const parsedDefData = this.$store.state.parsedDefObj
           const dataIndex = this.buildDataIndex(parsedDefData, columns)
           this.$store.commit(SET_DATA_INDEX, dataIndex)
+          for (let combination in dataIndex) {
+            this.results[combination] = []
+          }
         }
       },
       onComplete () {
         this.t1 = performance.now()
         console.log('Processing data in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
-        this.plot(this.results, 'svg-plot')
+//        this.plot(this.results, 'svg-plot')
+        for (let combination in this.$store.state.dataIndex) {
+          this.plot(this.results[combination], combination)
+        }
+        console.log(this.results)
         console.log('Plotting in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
       },
       parseDefinitionFile (event) {
