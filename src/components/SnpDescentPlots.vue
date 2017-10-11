@@ -98,8 +98,15 @@
             return d
           }).ticks(2)
         svg.append('g').attr('transform', 'translate(30,50)').attr('height', height).call(yAxis)
-        svg.selectAll('dot').data(data).enter().append('circle').attr('r', 1).attr('cx', d => x(d[0]))
-          .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20)).attr('transform', 'translate(32, 50)')
+        svg.selectAll('dot').data(data).enter().append('circle')
+          .attr('r', 1).attr('cx', d => x(d[0]))
+          .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20))
+          .attr('transform', 'translate(32, 50)')
+        svg.append('text')
+          .attr('x', width / 2)
+          .attr('y', 30)
+          .attr('text-anchor', 'middle')
+          .text(plotId)
       },
       onDownloadButtonClick () {
 //        const canvas = document.getElementById('plot-svg')
