@@ -65,7 +65,7 @@
 </style>
 <script>
   import { mapState } from 'vuex'
-  import { SET_PARSED_DEF_OBJ } from '../store/mutations'
+  import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import * as d3 from 'd3'
 
   export default {
@@ -161,7 +161,8 @@
           this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
         } else if (columns[0] === 'Name') {
           const parsedDefData = this.$store.state.parsedDefObj
-          this.buildDataIndex(parsedDefData, columns)
+          const dataIndex = this.buildDataIndex(parsedDefData, columns)
+          this.$store.commit(SET_DATA_INDEX, dataIndex)
         }
       },
       onComplete () {
