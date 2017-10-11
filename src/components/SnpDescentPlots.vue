@@ -59,9 +59,6 @@
 <style>
   .plot-container {
     margin: 1rem 0;
-    border: 1px solid #dddddd;
-    width: 100%;
-    height: 1000px;
   }
 </style>
 <script>
@@ -107,6 +104,14 @@
           .attr('y', 30)
           .attr('text-anchor', 'middle')
           .text(plotId)
+        svg.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('height', height)
+          .attr('width', width)
+          .style('fill', 'none')
+          .style('stroke', 'black')
+          .style('stroke-width', 1)
       },
       onDownloadButtonClick () {
 //        const canvas = document.getElementById('plot-svg')
@@ -133,7 +138,7 @@
       onProcessData () {
         this.clear()
         this.t0 = performance.now()
-        const maxLines = 1000000
+        const maxLines = 10000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
