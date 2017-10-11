@@ -73,6 +73,7 @@
     data: function () {
       return {
         dataFile: undefined,
+        counts: {},
         t0: undefined,
         t1: undefined,
         results: {},
@@ -80,30 +81,53 @@
       }
     },
     methods: {
-      plot (data, plotId) {
+      plot (data, plotId, counts) {
         const height = 300
         const width = 1000
-        const x = d3.scaleLinear(x).range([width * 0.9, 0])
-        const y = d3.scaleLinear(y).range([height / 2, 0])
+        const plotWidth = width * 0.9
+        const plotHeight = height / 2
+
+        const x = d3.scaleLinear(x).range([plotWidth, 0])
+        const y = d3.scaleLinear(y).range([plotHeight, 0])
         x.domain(d3.extent(data, d => d[0]))
         y.domain([0, d3.max(data, d => d[1])])
+
         const svg = d3.select('#plot')
           .append('svg')
           .attr('width', width)
           .attr('height', height).append('g')
           .attr('id', plotId)
-        const yAxis = d3.axisLeft(y).scale(y)
+
+        const yAxisLeft = d3.axisLeft(y).scale(y)
           .tickFormat(function (d) {
             return d
           }).ticks(2)
-        svg.append('g').attr('transform', 'translate(30,50)').attr('height', height).call(yAxis)
+
+        const yAxisRight = d3.axisRight(y).scale(y)
+          .tickFormat(function (d) {
+            return counts[d]
+          })
+          .ticks(2)
+
+        svg.append('g')
+          .attr('transform', 'translate(' + (parseInt(plotWidth) + 32) + ',50)')
+          .attr('height', height)
+          .call(yAxisRight)
+
+        svg.append('g')
+          .attr('transform', 'translate(30,50)')
+          .attr('height', height)
+          .call(yAxisLeft)
+
         svg.selectAll('dot').data(data).enter().append('circle')
-          .attr('r', 1).attr('cx', d => x(d[0]))
+          .attr('r', 1)
+          .attr('cx', d => x(d[0]))
           .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20))
           .attr('transform', 'translate(32, 50)')
+
         svg.append('text')
           .attr('x', width / 2)
-          .attr('y', 30)
+          .attr('y', 25)
           .attr('text-anchor', 'middle')
           .text(plotId)
         svg.append('rect')
@@ -140,7 +164,7 @@
       },
       clear () {
         this.results = {}
-        d3.select('svg').remove()
+        d3.selectAll('svg').remove()
       },
       calculatePlotCombinations (defs) {
         const keys = Object.keys(defs)
@@ -156,7 +180,7 @@
       onProcessData () {
         this.clear()
         this.t0 = performance.now()
-        const maxLines = 10000
+        const maxLines = 1000000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
@@ -193,28 +217,26 @@
             const index2 = this.$store.state.dataIndex[combination].gPos2
             const id1 = columns[index1]
             const id2 = columns[index2]
-            this.results[combination].push([parseInt(columns[2]), this.compareAlleles(id1, id2)])
+            const alleleScore = this.compareAlleles(id1, id2)
+            // The alleleScore is equal to the key in the counts object
+            this.results[combination].counts[alleleScore] += 1
+            this.results[combination].points.push([parseInt(columns[2]), alleleScore])
           }
-//          const p1 = columns[3]
-//          const p2 = columns[6]
-//          this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
         } else if (columns[0] === 'Name') {
           const parsedDefData = this.$store.state.parsedDefObj
           const dataIndex = this.buildDataIndex(parsedDefData, columns)
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           for (let combination in dataIndex) {
-            this.results[combination] = []
+            this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
           }
         }
       },
       onComplete () {
         this.t1 = performance.now()
         console.log('Processing data in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
-//        this.plot(this.results, 'svg-plot')
         for (let combination in this.$store.state.dataIndex) {
-          this.plot(this.results[combination], combination)
+          this.plot(this.results[combination].points, combination, this.results[combination].counts)
         }
-        console.log(this.results)
         console.log('Plotting in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
       },
       parseDefinitionFile (event) {
