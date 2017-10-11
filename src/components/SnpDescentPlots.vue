@@ -64,7 +64,7 @@
   }
 </style>
 <script>
-  import {mapState} from 'vuex'
+  import { mapState } from 'vuex'
   import * as d3 from 'd3'
 
   export default {
@@ -72,6 +72,7 @@
     data: function () {
       return {
         defFile: undefined,
+        defData: {},
         dataFile: undefined,
         t0: undefined,
         t1: undefined,
@@ -80,7 +81,7 @@
       }
     },
     methods: {
-      plot (data) {
+      plot (data, plotId) {
         const height = 300
         const width = 1000
         const x = d3.scaleLinear(x).range([width * 0.9, 0])
@@ -91,7 +92,7 @@
           .append('svg')
           .attr('width', width)
           .attr('height', height).append('g')
-          .attr('id', 'svg-plot')
+          .attr('id', plotId)
         const yAxis = d3.axisLeft(y).scale(y)
           .tickFormat(function (d) {
             return d
@@ -110,6 +111,17 @@
       clear () {
         this.results = []
         d3.select('svg').remove()
+      },
+      calculatePlotCombinations (defs) {
+        const keys = Object.keys(defs)
+        let results = {}
+        for (let i = 0; i < keys.length - 1; i++) {
+          // This is where you'll capture that last value
+          for (let j = i + 1; j < keys.length; j++) {
+            results[`${keys[i]}-${keys[j]}`] = [defs[keys[i]], defs[keys[j]]]
+          }
+        }
+        this.defData = results
       },
       onProcessData () {
         this.clear()
@@ -152,15 +164,18 @@
           const p1 = columns[3]
           const p2 = columns[6]
           this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
+        } else if (columns[0] === 'Name') {
+//          console.log(columns, this.defData)
         }
       },
       onComplete () {
         this.t1 = performance.now()
         console.log('Processing data in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
-        this.plot(this.results)
+        this.plot(this.results, 'svg-plot')
         console.log('Plotting in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
       },
       parseDefinitionFile (file) {
+        const self = this
         let defObj = {}
         const reader = new FileReader()
         reader.onload = function () {
@@ -171,9 +186,19 @@
           for (var i = 0; i < columns.length; i++) {
             defObj[columns[i]] = defs[i + 1]
           }
-          console.log(defObj)
+          self.calculatePlotCombinations(defObj)
         }
         reader.readAsText(file)
+      },
+      buildDataIndex (parsedDefData, columnHeaders) {
+        const combinations = Object.keys(parsedDefData)
+        let dataIndex = {}
+        for (let combination of combinations) {
+          const gPos1 = columnHeaders.indexOf(parsedDefData[combination][0] + '.GType')
+          const gPos2 = columnHeaders.indexOf(parsedDefData[combination][1] + '.GType')
+          dataIndex[combination] = {gPos1, gPos2}
+        }
+        return dataIndex
       },
       readSomeLines (file, maxlines, forEachLine, onComplete) {
         const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
@@ -224,9 +249,6 @@
           var slice = file.slice(offset, offset + CHUNK_SIZE)
           fr.readAsArrayBuffer(slice)
         }
-      },
-      readDefFile () {
-
       }
     },
     computed: {
