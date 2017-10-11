@@ -51,9 +51,7 @@
     </div>
     <div class="row">
       <div class="col">
-        <div id="plot" class="plot-container">
-          <h1>HAllo</h1>
-        </div>
+        <div id="plot" class="plot-container"></div>
       </div>
     </div>
   </div>
@@ -67,7 +65,8 @@
   import { mapState } from 'vuex'
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import * as d3 from 'd3'
-  import JsPdf from 'jspdf'
+  import JsPDF from 'jspdf-yworks'
+  import svg2pdf from 'svg2pdf.js'
 
   export default {
     name: 'snp-descent-plot',
@@ -117,10 +116,27 @@
           .style('stroke-width', 1)
       },
       onDownloadButtonClick () {
-        let pdf = new JsPdf()
-        const source = document.getElementsByClassName('plot-container')[0]
-        pdf.fromHTML(source)
-        pdf.save('test.pdf')
+        const svgElements = document.querySelectorAll('div>.plot-container>svg')
+        console.log(svgElements)
+        const width = 1000
+        const height = 1000
+
+        // create a new jsPDF instance
+        const pdf = new JsPDF('l', 'pt', [width, height])
+
+        // render the svg element
+        let yOffset = 0
+        svgElements.forEach(svgElement => {
+          console.log(yOffset, 'render')
+          svg2pdf(svgElement, pdf, {
+            xOffset: 0,
+            yOffset: yOffset,
+            scale: 1
+          })
+          yOffset += 300
+        })
+
+        pdf.save('test-svg.pdf')
       },
       clear () {
         this.results = {}
