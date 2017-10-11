@@ -51,7 +51,9 @@
     </div>
     <div class="row">
       <div class="col">
-        <div id="plot" class="plot-container"></div>
+        <div id="plot" class="plot-container">
+          <h1>HAllo</h1>
+        </div>
       </div>
     </div>
   </div>
@@ -68,6 +70,7 @@
   import { mapState } from 'vuex'
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import * as d3 from 'd3'
+  import JsPdf from 'jspdf'
 
   export default {
     name: 'snp-descent-plot',
@@ -109,11 +112,10 @@
           .text(plotId)
       },
       onDownloadButtonClick () {
-//        const canvas = document.getElementById('plot-svg')
-//        const img = canvas.toDataURL('image/jpeg', 0.5)
-//        document.write('<img src="' + img + '"/>')
-        // https://gist.github.com/vicapow/758fce6aa4c5195d24be
-        console.log('this should trigger download')
+        let pdf = new JsPdf()
+        const source = document.getElementsByClassName('plot-container')[0]
+        pdf.fromHTML(source)
+        pdf.save('test.pdf')
       },
       clear () {
         this.results = {}
