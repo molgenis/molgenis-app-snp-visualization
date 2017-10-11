@@ -5,7 +5,7 @@ export default {
   [SET_MESSAGE] (state, message) {
     state.message = message
   },
-  [SET_PARSED_DEF_OBJ] (state, parsedDefObj){
+  [SET_PARSED_DEF_OBJ] (state, parsedDefObj) {
     state.parsedDefObj = parsedDefObj
   }
 }

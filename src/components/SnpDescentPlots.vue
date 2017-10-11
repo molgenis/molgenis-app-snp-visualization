@@ -6,7 +6,7 @@
         <form>
           <div class="form-group">
             <label for="devFileInput">Definition file</label>
-            <input class="form-control" id="devFileInput" type="file" @change="storeDef">
+            <input class="form-control" id="devFileInput" type="file" @change="parseDefinitionFile">
           </div>
           <div class="form-group">
             <label for="snpFileInput">Data file</label>
@@ -65,13 +65,13 @@
 </style>
 <script>
   import { mapState } from 'vuex'
+  import { SET_PARSED_DEF_OBJ } from '../store/mutations'
   import * as d3 from 'd3'
 
   export default {
     name: 'snp-descent-plot',
     data: function () {
       return {
-        defFile: undefined,
         dataFile: undefined,
         t0: undefined,
         t1: undefined,
@@ -131,9 +131,6 @@
       storeData (event) {
         this.dataFile = event.target.files[0]
       },
-      storeDef (event) {
-        this.defFile = event.target.files[0]
-      },
       compareAlleles (p1, p2) {
         if (p1 === p2 || (p1 === 'AB' && p2 === 'BA') || (p1 === 'BA' && p2 === 'AB')) {
           return 2
@@ -163,10 +160,8 @@
           const p2 = columns[6]
           this.results.push([parseInt(columns[2]), this.compareAlleles(p1, p2)])
         } else if (columns[0] === 'Name') {
-          const parsedDefData = this.parseDefinitionFile(this.defFile)
-          console.log(parsedDefData)
-          const result = this.buildDataIndex(parsedDefData, columns)
-          console.log(result)
+          const parsedDefData = this.$store.state.parsedDefObj
+          this.buildDataIndex(parsedDefData, columns)
         }
       },
       onComplete () {
@@ -175,9 +170,10 @@
         this.plot(this.results, 'svg-plot')
         console.log('Plotting in ' + Math.round((this.t1 - this.t0) / 1000) + ' seconds')
       },
-      parseDefinitionFile (file) {
-        const self = this
+      parseDefinitionFile (event) {
+        const file = event.target.files[0]
         let defObj = {}
+        const self = this
         const reader = new FileReader()
         reader.onload = function () {
           const lines = reader.result.split('\n')
@@ -187,8 +183,7 @@
           for (var i = 0; i < columns.length; i++) {
             defObj[columns[i]] = defs[i + 1]
           }
-          console.log(self.calculatePlotCombinations(defObj))
-          return self.calculatePlotCombinations(defObj)
+          self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
         }
         reader.readAsText(file)
       },

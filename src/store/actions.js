@@ -17,23 +17,5 @@ export default {
     }, error => {
       console.log(error)
     })
-  },
-  [PARSE_DEF_FILE] ({commit}, file) {
-    const self = this
-    let defObj = {}
-    const reader = new FileReader()
-    reader.onload = function () {
-      const lines = reader.result.split('\n')
-      const columns = lines[0].split('\t')
-      columns.shift()
-      const defs = lines[1].split('\t')
-      for (var i = 0; i < columns.length; i++) {
-        defObj[columns[i]] = defs[i + 1]
-      }
-      console.log(self.calculatePlotCombinations(defObj))
-      return self.calculatePlotCombinations(defObj)
-    }
-    reader.readAsText(file)
-    commit(SET_PARSED_DEF_FILE, 'blabla')
   }
 }

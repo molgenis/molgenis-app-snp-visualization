@@ -46,9 +46,9 @@ describe('SnpDescentPlots', () => {
   })
   describe('buildDataIndex', () => {
     const parsedDefData = {
-      'father-mother': [1, 2],
-      'mother-child': [2, 3],
-      'father-child': [1, 3]
+      'father-mother': ['1', '2'],
+      'mother-child': ['2', '3'],
+      'father-child': ['1', '3']
     }
     const columnHeaders = ['Name', 'Chr', 'Position', '1.GType', '1.B Allele Freq', '1.Log R Ratio', '2.GType', '2.B Allele Freq', '2.Log R Ratio', '3.GType', '3.B Allele Freq', '3.Log R Ratio']
     it('should build the data index based on the definition data and the column headers', () => {
@@ -58,6 +58,18 @@ describe('SnpDescentPlots', () => {
         'father-child': {'gPos1': 3, 'gPos2': 9}
       }
       const result = SnpDescentPlots.methods.buildDataIndex(parsedDefData, columnHeaders)
+      expect(result).to.deep.equal(expectedResult)
+    })
+  })
+  describe('calculatePlotCombinations', () => {
+    it('should return an object all combinations in the definition file', () => {
+      const defs = {'father': '1', 'mother': '2', 'child': '3'}
+      const result = SnpDescentPlots.methods.calculatePlotCombinations(defs)
+      const expectedResult = {
+        'father-mother': ['1', '2'],
+        'mother-child': ['2', '3'],
+        'father-child': ['1', '3']
+      }
       expect(result).to.deep.equal(expectedResult)
     })
   })
