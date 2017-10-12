@@ -82,7 +82,6 @@
         status: '',
         dataFile: undefined,
         hasDefFile: false,
-        counts: {},
         t0: undefined,
         t1: undefined,
         results: {},
@@ -94,6 +93,7 @@
         this.status = `Plotting ${plotId}...`
 
         const timestamp = this.getCurrentDateTime()
+        const dnaNumbers = this.$store.state.parsedDefObj[plotId]
 
         const height = 300
         const width = 1000
@@ -142,7 +142,7 @@
           .attr('x', width / 2)
           .attr('y', 25)
           .attr('text-anchor', 'middle')
-          .text('Chromosome ' + this.selectedChromosome + ': ' + plotId)
+          .text(`Chromosome ${this.selectedChromosome} : ${plotId} (${dnaNumbers[0]}-${dnaNumbers[1]})`)
         svg.append('text')
           .attr('x', plotWidth - 50)
           .attr('y', 25)
