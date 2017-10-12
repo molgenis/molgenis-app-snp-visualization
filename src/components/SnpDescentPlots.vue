@@ -42,7 +42,7 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData" :disabled="disableProcess">Process data</button>
-          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
+          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick" :disabled="!isReadyToDownLoad">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
           <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i
@@ -82,6 +82,7 @@
     data: function () {
       return {
         disableProcess: true,
+        isReadyToDownLoad: false,
         isLoading: false,
         status: '',
         dataFile: undefined,
@@ -195,6 +196,9 @@
       clear () {
         this.results = {}
         d3.selectAll('.plot-container').remove()
+        this.isReadyToDownLoad = false
+        this.isLoading = false
+        this.status = ''
       },
       calculatePlotCombinations (defs) {
         const keys = Object.keys(defs)
@@ -208,9 +212,9 @@
         return results
       },
       onProcessData () {
+        this.clear()
         this.isLoading = true
         this.status = 'Processing data'
-        this.clear()
         this.t0 = performance.now()
         const maxLines = 1000000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
@@ -279,6 +283,7 @@
           yOffset += height + bottomMargin
         }
         this.isLoading = false
+        this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
       },
       readDefinitionLines (lineData) {
