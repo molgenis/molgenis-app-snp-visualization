@@ -45,7 +45,8 @@
           <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
-          <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
+          <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i
+            class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
         </form>
       </div>
     </div>
@@ -61,6 +62,7 @@
   .plot-container {
     margin: 1rem 0;
   }
+
   #statusUpdate {
     color: grey;
   }
@@ -88,7 +90,10 @@
     },
     methods: {
       plot (data, plotId, counts) {
-        this.status = 'Plotting...'
+        this.status = `Plotting ${plotId}...`
+
+        const timestamp = this.getCurrentDateTime()
+
         const height = 300
         const width = 1000
         const plotWidth = width * 0.9
@@ -137,6 +142,12 @@
           .attr('y', 25)
           .attr('text-anchor', 'middle')
           .text(plotId)
+        svg.append('text')
+          .attr('x', plotWidth - 100)
+          .attr('y', 25)
+          .style('fill', 'grey')
+          .style('font-size', '10px')
+          .text(timestamp)
         svg.append('rect')
           .attr('x', 0)
           .attr('y', 0)
@@ -145,6 +156,15 @@
           .style('fill', 'none')
           .style('stroke', 'black')
           .style('stroke-width', 1)
+      },
+      getCurrentDateTime () {
+        var currentdate = new Date()
+        var datetime = currentdate.getDate() + '/' +
+          (currentdate.getMonth() + 1) + '/' +
+          currentdate.getFullYear() + ' @ ' +
+          currentdate.getHours() + ':' +
+          currentdate.getMinutes()
+        return datetime
       },
       onDownloadButtonClick () {
         const svgElements = document.querySelectorAll('div>.plot-container>svg')
