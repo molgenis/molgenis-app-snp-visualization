@@ -45,7 +45,7 @@
           <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
-          <span id="statusUpdate"><small><i><span v-model="status"> {{status}}</span></i></small><i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
+          <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
         </form>
       </div>
     </div>
@@ -248,19 +248,23 @@
         this.isLoading = false
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
       },
+      readDefinitionLines (lineData) {
+        let defObj = {}
+        const lines = lineData.split('\n')
+        const columns = lines[0].replace(/\r/g, '').split('\t')
+        columns.shift()
+        const defs = lines[1].replace(/\r/g, '').split('\t')
+        for (var i = 0; i < columns.length; i++) {
+          defObj[columns[i]] = defs[i + 1]
+        }
+        return defObj
+      },
       parseDefinitionFile (event) {
         const file = event.target.files[0]
-        let defObj = {}
         const self = this
         const reader = new FileReader()
         reader.onload = function () {
-          const lines = reader.result.split('\n')
-          const columns = lines[0].split('\t')
-          columns.shift()
-          const defs = lines[1].split('\t')
-          for (var i = 0; i < columns.length; i++) {
-            defObj[columns[i]] = defs[i + 1]
-          }
+          const defObj = self.readDefinitionLines(reader.result)
           self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
         }
         reader.readAsText(file)

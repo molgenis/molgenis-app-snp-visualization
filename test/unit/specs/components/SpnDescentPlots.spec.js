@@ -73,4 +73,18 @@ describe('SnpDescentPlots', () => {
       expect(result).to.deep.equal(expectedResult)
     })
   })
+  describe('readDefinitionLines', () => {
+    it('should return an object with as keys the columns, except from the id, and as values the values in the columns', () => {
+      const lineData = 'trioID\tfather\tmother\tchild\ntrio_1\t25\t26\t27\n'
+      const result = SnpDescentPlots.methods.readDefinitionLines(lineData)
+      const expectedResult = {father: '25', mother: '26', child: '27'}
+      expect(result).to.deep.equal(expectedResult)
+    })
+    it('should parse the definition file, splitting on all end of line characters', () => {
+      const lineData = 'trioID\tfather\tmother\tchild\ntrio_1\t25\t26\t27\r\n'
+      const result = SnpDescentPlots.methods.readDefinitionLines(lineData)
+      const expectedResult = '27'
+      expect(result.child).to.equal(expectedResult)
+    })
+  })
 })
