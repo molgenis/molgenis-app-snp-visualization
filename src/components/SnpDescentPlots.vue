@@ -301,7 +301,7 @@
       },
       readSomeLines (file, maxlines, forEachLine, onComplete) {
         const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
-        const decoder = new TextDecoder()
+        // const decoder = new TextDecoder()
         let offset = 0
         let linecount = 0
         let results = ''
@@ -309,9 +309,10 @@
         fr.onload = function () {
           // Use stream:true in case we cut the file
           // in the middle of a multi-byte character
-          results += decoder.decode(fr.result, {
-            stream: true
-          })
+          // results += decoder.decode(fr.result, {
+          //   stream: true
+          // })
+          results = fr.result
           let lines = results.split('\n')
           results = lines.pop() // In case the line did not end yet.
           linecount += lines.length
@@ -346,7 +347,7 @@
             return
           }
           var slice = file.slice(offset, offset + CHUNK_SIZE)
-          fr.readAsArrayBuffer(slice)
+          fr.readAsText(slice)
         }
       }
     },
