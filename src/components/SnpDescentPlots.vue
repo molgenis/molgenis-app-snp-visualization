@@ -41,7 +41,7 @@
               <option>Y</option>
             </select>
           </div>
-          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
+          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData" :disabled="disableProcess">Process data</button>
           <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
@@ -77,9 +77,11 @@
     name: 'snp-descent-plot',
     data: function () {
       return {
+        disableProcess: true,
         isLoading: false,
         status: '',
         dataFile: undefined,
+        hasDefFile: false,
         counts: {},
         t0: undefined,
         t1: undefined,
@@ -156,6 +158,13 @@
           .style('stroke', 'black')
           .style('stroke-width', 1)
       },
+      setDisableProcess () {
+        if (this.dataFile && this.hasDefFile) {
+          this.disableProcess = false
+        } else {
+          this.disableProcess = true
+        }
+      },
       getCurrentDateTime () {
         var currentdate = new Date()
         var minutes = currentdate.getMinutes()
@@ -201,6 +210,7 @@
       },
       storeData (event) {
         this.dataFile = event.target.files[0]
+        this.setDisableProcess()
       },
       compareAlleles (p1, p2) {
         if (p1 === p2 || (p1 === 'AB' && p2 === 'BA') || (p1 === 'BA' && p2 === 'AB')) {
@@ -268,13 +278,19 @@
       },
       parseDefinitionFile (event) {
         const file = event.target.files[0]
-        const self = this
-        const reader = new FileReader()
-        reader.onload = function () {
-          const defObj = self.readDefinitionLines(reader.result)
-          self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
+        if (file) {
+          this.hasDefFile = true
+          const self = this
+          const reader = new FileReader()
+          reader.onload = function () {
+            const defObj = self.readDefinitionLines(reader.result)
+            self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
+          }
+          reader.readAsText(file)
+        } else {
+          this.hasDefFile = false
+          this.setDisableProcess()
         }
-        reader.readAsText(file)
       },
       buildDataIndex (parsedDefData, columnHeaders) {
         const combinations = Object.keys(parsedDefData)
