@@ -141,9 +141,9 @@
           .attr('x', width / 2)
           .attr('y', 25)
           .attr('text-anchor', 'middle')
-          .text(plotId)
+          .text('Chromosome ' + this.selectedChromosome + ': ' + plotId)
         svg.append('text')
-          .attr('x', plotWidth - 100)
+          .attr('x', plotWidth - 50)
           .attr('y', 25)
           .style('fill', 'grey')
           .style('font-size', '10px')
@@ -159,11 +159,15 @@
       },
       getCurrentDateTime () {
         var currentdate = new Date()
+        var minutes = currentdate.getMinutes()
+        if (minutes < 10) {
+          minutes = '0' + minutes.toString()
+        }
         var datetime = currentdate.getDate() + '/' +
           (currentdate.getMonth() + 1) + '/' +
           currentdate.getFullYear() + ' @ ' +
           currentdate.getHours() + ':' +
-          currentdate.getMinutes()
+          minutes
         return datetime
       },
       onDownloadButtonClick () {
