@@ -85,18 +85,25 @@
         t0: undefined,
         t1: undefined,
         results: {},
-        selectedChromosome: '1'
+        selectedChromosome: '1',
+        plotSizes: {
+          height: 300,
+          width: 1000,
+          bottomMargin: 30,
+          titleOffset: 25
+        }
       }
     },
     methods: {
-      plot (data, plotId, counts) {
+      plot (data, plotId, counts, svg, yOffset) {
         this.status = `Plotting ${plotId}...`
 
         const timestamp = this.getCurrentDateTime()
         const dnaNumbers = this.$store.state.parsedDefObj[plotId]
 
-        const height = 300
-        const width = 1000
+        const height = this.plotSizes.height
+        const width = this.plotSizes.width
+        const titleOffset = this.plotSizes.titleOffset
         const plotWidth = width * 0.9
         const plotHeight = height / 2
 
@@ -104,12 +111,6 @@
         const y = d3.scaleLinear(y).range([plotHeight, 0])
         x.domain(d3.extent(data, d => d[0]))
         y.domain([0, d3.max(data, d => d[1])])
-
-        const svg = d3.select('#plot')
-          .append('svg')
-          .attr('width', width)
-          .attr('height', height).append('g')
-          .attr('id', plotId)
 
         const yAxisLeft = d3.axisLeft(y).scale(y)
           .tickFormat(function (d) {
@@ -121,14 +122,13 @@
             return counts[d]
           })
           .ticks(2)
-
         svg.append('g')
-          .attr('transform', 'translate(' + (parseInt(plotWidth) + 32) + ',50)')
+          .attr('transform', `translate(${(parseInt(plotWidth) + 32)},${yOffset + 50})`)
           .attr('height', height)
           .call(yAxisRight)
 
         svg.append('g')
-          .attr('transform', 'translate(30,50)')
+          .attr('transform', `translate(30,${yOffset + 50})`)
           .attr('height', height)
           .call(yAxisLeft)
 
@@ -136,22 +136,22 @@
           .attr('r', 1)
           .attr('cx', d => x(d[0]))
           .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20))
-          .attr('transform', 'translate(32, 50)')
+          .attr('transform', `translate(32,${yOffset + 50})`)
 
         svg.append('text')
           .attr('x', width / 2)
-          .attr('y', 25)
+          .attr('y', titleOffset + yOffset)
           .attr('text-anchor', 'middle')
           .text(`Chromosome ${this.selectedChromosome} : ${plotId} (${dnaNumbers[0]}-${dnaNumbers[1]})`)
         svg.append('text')
           .attr('x', plotWidth - 50)
-          .attr('y', 25)
+          .attr('y', titleOffset + yOffset)
           .style('fill', 'grey')
           .style('font-size', '10px')
           .text(timestamp)
         svg.append('rect')
           .attr('x', 0)
-          .attr('y', 0)
+          .attr('y', yOffset)
           .attr('height', height)
           .attr('width', width)
           .style('fill', 'none')
@@ -180,9 +180,10 @@
       },
       onDownloadButtonClick () {
         const svgElements = document.querySelectorAll('div>.plot-container>svg')
+        const timestamp = this.getCurrentDateTime().replace(/ /g, '_')
         svgElements.forEach(svgElement => {
-          const name = svgElement.getElementsByTagName('g')[0].id + '.png'
-          saveSvgAsPng(svgElement, name)
+          const name = `${timestamp}.png`
+          saveSvgAsPng(svgElement, name, {backgroundColor: 'white'})
         })
       },
       clear () {
@@ -259,8 +260,18 @@
       },
       onComplete () {
         this.t1 = performance.now()
+        const numberOfCombinations = Object.keys(this.$store.state.dataIndex).length
+        const height = this.plotSizes.height
+        const bottomMargin = this.plotSizes.bottomMargin
+        const svg = d3.select('#plot')
+          .append('svg')
+          .attr('width', 1000)
+          .attr('height', (height + bottomMargin) * numberOfCombinations)
+          .attr('id', 'plots')
+        let yOffset = 0
         for (let combination in this.$store.state.dataIndex) {
-          this.plot(this.results[combination].points, combination, this.results[combination].counts)
+          this.plot(this.results[combination].points, combination, this.results[combination].counts, svg, yOffset)
+          yOffset += height + bottomMargin
         }
         this.isLoading = false
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
