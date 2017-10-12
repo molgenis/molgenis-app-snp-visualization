@@ -143,7 +143,7 @@
           .attr('text-anchor', 'middle')
           .text(plotId)
         svg.append('text')
-          .attr('x', plotWidth - 100)
+          .attr('x', plotWidth - 50)
           .attr('y', 25)
           .style('fill', 'grey')
           .style('font-size', '10px')
