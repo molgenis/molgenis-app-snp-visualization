@@ -1,6 +1,6 @@
-# m5128_snp_descent_plots
+# snp-visualization
 
-> A MOLGENIS Vue.js project
+> Application for visualising snp (single-nucleotide polymorphism) data using javascript
 
 ## Build Setup
 
@@ -8,16 +8,18 @@
 # install dependencies
 yarn install
 
+# run tests
+yarn test
+
 # serve with hot reload at localhost:8080
-yarn run dev
+yarn dev
 
 # build for production with minification
-yarn run build
+yarn build
 
 # build for production and view the bundle analyzer report
 yarn run build --report
 
 # run all tests
-yarn run test
+yarn test
 ```
-# snp_descent_plots
