@@ -41,7 +41,7 @@
               <option>Y</option>
             </select>
           </div>
-          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData">Process data</button>
+          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData" :disabled="disableProcess">Process data</button>
           <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
@@ -71,17 +71,17 @@
   import { mapState } from 'vuex'
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import * as d3 from 'd3'
-  import JsPDF from 'jspdf-yworks'
-  import svg2pdf from 'svg2pdf.js'
+  import { saveSvgAsPng } from 'save-svg-as-png'
 
   export default {
     name: 'snp-descent-plot',
     data: function () {
       return {
+        disableProcess: true,
         isLoading: false,
         status: '',
         dataFile: undefined,
-        counts: {},
+        hasDefFile: false,
         t0: undefined,
         t1: undefined,
         results: {},
@@ -93,6 +93,7 @@
         this.status = `Plotting ${plotId}...`
 
         const timestamp = this.getCurrentDateTime()
+        const dnaNumbers = this.$store.state.parsedDefObj[plotId]
 
         const height = 300
         const width = 1000
@@ -141,7 +142,7 @@
           .attr('x', width / 2)
           .attr('y', 25)
           .attr('text-anchor', 'middle')
-          .text('Chromosome ' + this.selectedChromosome + ': ' + plotId)
+          .text(`Chromosome ${this.selectedChromosome} : ${plotId} (${dnaNumbers[0]}-${dnaNumbers[1]})`)
         svg.append('text')
           .attr('x', plotWidth - 50)
           .attr('y', 25)
@@ -156,6 +157,13 @@
           .style('fill', 'none')
           .style('stroke', 'black')
           .style('stroke-width', 1)
+      },
+      setDisableProcess () {
+        if (this.dataFile && this.hasDefFile) {
+          this.disableProcess = false
+        } else {
+          this.disableProcess = true
+        }
       },
       getCurrentDateTime () {
         var currentdate = new Date()
@@ -172,26 +180,10 @@
       },
       onDownloadButtonClick () {
         const svgElements = document.querySelectorAll('div>.plot-container>svg')
-        console.log(svgElements)
-        const width = 1000
-        const height = 1000
-
-        // create a new jsPDF instance
-        const pdf = new JsPDF('l', 'pt', [width, height])
-
-        // render the svg element
-        let yOffset = 0
         svgElements.forEach(svgElement => {
-          console.log(yOffset, 'render')
-          svg2pdf(svgElement, pdf, {
-            xOffset: 0,
-            yOffset: yOffset,
-            scale: 1
-          })
-          yOffset += 300
+          const name = svgElement.getElementsByTagName('g')[0].id + '.png'
+          saveSvgAsPng(svgElement, name)
         })
-
-        pdf.save('test-svg.pdf')
       },
       clear () {
         this.results = {}
@@ -218,6 +210,7 @@
       },
       storeData (event) {
         this.dataFile = event.target.files[0]
+        this.setDisableProcess()
       },
       compareAlleles (p1, p2) {
         if (p1 === p2 || (p1 === 'AB' && p2 === 'BA') || (p1 === 'BA' && p2 === 'AB')) {
@@ -285,13 +278,19 @@
       },
       parseDefinitionFile (event) {
         const file = event.target.files[0]
-        const self = this
-        const reader = new FileReader()
-        reader.onload = function () {
-          const defObj = self.readDefinitionLines(reader.result)
-          self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
+        if (file) {
+          this.hasDefFile = true
+          const self = this
+          const reader = new FileReader()
+          reader.onload = function () {
+            const defObj = self.readDefinitionLines(reader.result)
+            self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
+          }
+          reader.readAsText(file)
+        } else {
+          this.hasDefFile = false
+          this.setDisableProcess()
         }
-        reader.readAsText(file)
       },
       buildDataIndex (parsedDefData, columnHeaders) {
         const combinations = Object.keys(parsedDefData)
