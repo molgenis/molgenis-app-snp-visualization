@@ -41,6 +41,7 @@
       drawChromText (chr, fontsize, band, id, y, x) {
         chr.append('text')
           .attr('font-size', fontsize)
+          .attr('font-family', 'sans-serif')
           .attr('fill', 'black')
           .attr('id', id + '_' + band + '_desc')
           .attr('x', x)
