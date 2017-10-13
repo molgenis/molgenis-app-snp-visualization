@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col">
-        <h1>SNP descent plots</h1>
+        <h1>SNP Visualizations</h1>
         <form>
           <div class="form-group">
             <label for="devFileInput">Definition file</label>
