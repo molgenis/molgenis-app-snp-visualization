@@ -54,7 +54,7 @@
       <div class="col">
         <div id="plot" class="plots-container">
          <svg>
-          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome"></chromosome>
+          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome" v-if="chromosomeShow"></chromosome>
          </svg>
         </div>
       </div>
@@ -81,6 +81,7 @@
     name: 'snp-descent-plot',
     data: function () {
       return {
+        chromosomeShow: false,
         disableProcess: true,
         isReadyToDownLoad: false,
         isLoading: false,
@@ -214,6 +215,7 @@
       onProcessData () {
         this.clear()
         this.isLoading = true
+        this.chromosomeShow = true
         this.status = 'Processing data'
         this.t0 = performance.now()
         const maxLines = 1000000
