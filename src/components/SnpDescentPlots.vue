@@ -14,7 +14,7 @@
           </div>
           <div class="form-group">
             <label for="selectChromosome">Chromosome</label>
-            <select class="form-control" id="selectChromosome" v-model="selectedChromosome">
+            <select class="form-control" id="selectChromosome" v-model="selectedChromosome" @change="hidePlots">
               <option>1</option>
               <option>2</option>
               <option>3</option>
@@ -52,9 +52,9 @@
     </div>
     <div class="row">
       <div class="col">
-        <div id="plot" class="plots-container">
+        <div id="plot" class="plots-container" v-show="isDisplayPlots">
          <svg>
-          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome" v-if="chromosomeShow"></chromosome>
+          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome"></chromosome>
          </svg>
         </div>
       </div>
@@ -81,7 +81,7 @@
     name: 'snp-descent-plot',
     data: function () {
       return {
-        chromosomeShow: false,
+        isDisplayPlots: false,
         disableProcess: true,
         isReadyToDownLoad: false,
         isLoading: false,
@@ -168,6 +168,9 @@
           .style('stroke', 'black')
           .style('stroke-width', 1)
       },
+      hidePlots () {
+        this.isDisplayPlots = false
+      },
       setDisableProcess () {
         if (this.dataFile && this.hasDefFile) {
           this.disableProcess = false
@@ -196,6 +199,7 @@
       },
       clear () {
         this.results = {}
+        this.isDisplayPlots = false
         d3.selectAll('.plot-container').remove()
         this.isReadyToDownLoad = false
         this.isLoading = false
@@ -215,7 +219,7 @@
       onProcessData () {
         this.clear()
         this.isLoading = true
-        this.chromosomeShow = true
+        this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
         const maxLines = 1000000
