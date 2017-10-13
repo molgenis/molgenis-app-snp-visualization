@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col">
-        <h1>SNP descent plots</h1>
+        <h1>SNP Visualizations</h1>
         <form>
           <div class="form-group">
             <label for="devFileInput">Definition file</label>
@@ -14,7 +14,7 @@
           </div>
           <div class="form-group">
             <label for="selectChromosome">Chromosome</label>
-            <select class="form-control" id="selectChromosome" v-model="selectedChromosome">
+            <select class="form-control" id="selectChromosome" v-model="selectedChromosome" @change="hidePlots">
               <option>1</option>
               <option>2</option>
               <option>3</option>
@@ -42,7 +42,7 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData" :disabled="disableProcess">Process data</button>
-          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick">
+          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick" :disabled="!isReadyToDownLoad">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
           <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i
@@ -52,14 +52,17 @@
     </div>
     <div class="row">
       <div class="col">
-        <div id="plot" class="plot-container">
+        <div id="plot" class="plots-container" v-show="isDisplayPlots">
+         <svg>
+          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome"></chromosome>
+         </svg>
         </div>
       </div>
     </div>
   </div>
 </template>
 <style>
-  .plot-container {
+  .plots-container {
     margin: 1rem 0;
   }
 
@@ -70,6 +73,7 @@
 <script>
   import { mapState } from 'vuex'
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
+  import Chromosome from './Chromosome'
   import * as d3 from 'd3'
   import { saveSvgAsPng } from 'save-svg-as-png'
 
@@ -77,7 +81,9 @@
     name: 'snp-descent-plot',
     data: function () {
       return {
+        isDisplayPlots: false,
         disableProcess: true,
+        isReadyToDownLoad: false,
         isLoading: false,
         status: '',
         dataFile: undefined,
@@ -94,8 +100,9 @@
         }
       }
     },
+    components: {Chromosome},
     methods: {
-      plot (data, plotId, counts, svg, yOffset) {
+      plot (data, plotId, counts, yOffset, svg) {
         this.status = `Plotting ${plotId}...`
 
         const timestamp = this.getCurrentDateTime()
@@ -122,34 +129,37 @@
             return counts[d]
           })
           .ticks(2)
-        svg.append('g')
+        let plotContainer = svg.append('svg').attr('class', 'plot-container')
+        plotContainer.append('g')
           .attr('transform', `translate(${(parseInt(plotWidth) + 32)},${yOffset + 50})`)
           .attr('height', height)
           .call(yAxisRight)
 
-        svg.append('g')
+        plotContainer.append('g')
           .attr('transform', `translate(30,${yOffset + 50})`)
           .attr('height', height)
           .call(yAxisLeft)
 
-        svg.selectAll('dot').data(data).enter().append('circle')
+        plotContainer.selectAll('dot').data(data).enter().append('circle')
           .attr('r', 1)
           .attr('cx', d => x(d[0]))
           .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20))
           .attr('transform', `translate(32,${yOffset + 50})`)
 
-        svg.append('text')
+        plotContainer.append('text')
           .attr('x', width / 2)
           .attr('y', titleOffset + yOffset)
           .attr('text-anchor', 'middle')
+          .attr('font-family', 'sans-serif')
           .text(`Chromosome ${this.selectedChromosome} : ${plotId} (${dnaNumbers[0]}-${dnaNumbers[1]})`)
-        svg.append('text')
+        plotContainer.append('text')
           .attr('x', plotWidth - 50)
           .attr('y', titleOffset + yOffset)
           .style('fill', 'grey')
           .style('font-size', '10px')
+          .attr('font-family', 'sans-serif')
           .text(timestamp)
-        svg.append('rect')
+        plotContainer.append('rect')
           .attr('x', 0)
           .attr('y', yOffset)
           .attr('height', height)
@@ -157,6 +167,9 @@
           .style('fill', 'none')
           .style('stroke', 'black')
           .style('stroke-width', 1)
+      },
+      hidePlots () {
+        this.isDisplayPlots = false
       },
       setDisableProcess () {
         if (this.dataFile && this.hasDefFile) {
@@ -179,16 +192,18 @@
         return datetime
       },
       onDownloadButtonClick () {
-        const svgElements = document.querySelectorAll('div>.plot-container>svg')
+        const svgElements = document.querySelectorAll('div>.plots-container>svg')
         const timestamp = this.getCurrentDateTime().replace(/ /g, '_')
-        svgElements.forEach(svgElement => {
-          const name = `${timestamp}.png`
-          saveSvgAsPng(svgElement, name, {backgroundColor: 'white'})
-        })
+        const name = `${timestamp}.png`
+        saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
       clear () {
         this.results = {}
-        d3.selectAll('svg').remove()
+        this.isDisplayPlots = false
+        d3.selectAll('.plot-container').remove()
+        this.isReadyToDownLoad = false
+        this.isLoading = false
+        this.status = ''
       },
       calculatePlotCombinations (defs) {
         const keys = Object.keys(defs)
@@ -202,9 +217,10 @@
         return results
       },
       onProcessData () {
-        this.isLoading = true
-        this.status = 'Processing data'
         this.clear()
+        this.isLoading = true
+        this.isDisplayPlots = true
+        this.status = 'Processing data'
         this.t0 = performance.now()
         const maxLines = 1000000
         this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
@@ -263,17 +279,17 @@
         const numberOfCombinations = Object.keys(this.$store.state.dataIndex).length
         const height = this.plotSizes.height
         const bottomMargin = this.plotSizes.bottomMargin
-        const svg = d3.select('#plot')
-          .append('svg')
+        const svg = d3.select('svg')
           .attr('width', 1000)
-          .attr('height', (height + bottomMargin) * numberOfCombinations)
+          .attr('height', ((height + bottomMargin) * numberOfCombinations) + 120)
           .attr('id', 'plots')
-        let yOffset = 0
+        let yOffset = 70
         for (let combination in this.$store.state.dataIndex) {
-          this.plot(this.results[combination].points, combination, this.results[combination].counts, svg, yOffset)
+          this.plot(this.results[combination].points, combination, this.results[combination].counts, yOffset, svg)
           yOffset += height + bottomMargin
         }
         this.isLoading = false
+        this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
       },
       readDefinitionLines (lineData) {
