@@ -76,6 +76,7 @@
   import Chromosome from './Chromosome'
   import * as d3 from 'd3'
   import { saveSvgAsPng } from 'save-svg-as-png'
+  import lineReader from '../service/lineReader'
 
   export default {
     name: 'snp-descent-plot',
@@ -172,24 +173,19 @@
         this.isDisplayPlots = false
       },
       setDisableProcess () {
-        if (this.dataFile && this.hasDefFile) {
-          this.disableProcess = false
-        } else {
-          this.disableProcess = true
-        }
+        this.disableProcess = !(this.dataFile && this.hasDefFile)
       },
       getCurrentDateTime () {
-        var currentdate = new Date()
-        var minutes = currentdate.getMinutes()
+        let currentDate = new Date()
+        let minutes = currentDate.getMinutes()
         if (minutes < 10) {
           minutes = '0' + minutes.toString()
         }
-        var datetime = currentdate.getDate() + '/' +
-          (currentdate.getMonth() + 1) + '/' +
-          currentdate.getFullYear() + ' @ ' +
-          currentdate.getHours() + ':' +
+        return currentDate.getDate() + '/' +
+          (currentDate.getMonth() + 1) + '/' +
+          currentDate.getFullYear() + ' @ ' +
+          currentDate.getHours() + ':' +
           minutes
-        return datetime
       },
       onDownloadButtonClick () {
         const svgElements = document.querySelectorAll('div>.plots-container>svg')
@@ -222,8 +218,8 @@
         this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
-        const maxLines = 1000000
-        this.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
+        const maxLines = 1000
+        lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
         this.dataFile = event.target.files[0]
@@ -298,7 +294,7 @@
         const columns = lines[0].replace(/\r/g, '').split('\t')
         columns.shift()
         const defs = lines[1].replace(/\r/g, '').split('\t')
-        for (var i = 0; i < columns.length; i++) {
+        for (let i = 0; i < columns.length; i++) {
           defObj[columns[i]] = defs[i + 1]
         }
         return defObj
@@ -328,52 +324,6 @@
           dataIndex[combination] = {gPos1, gPos2}
         }
         return dataIndex
-      },
-      readSomeLines (file, maxlines, forEachLine, onComplete) {
-        const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
-        // const decoder = new TextDecoder()
-        let offset = 0
-        let linecount = 0
-        let results = ''
-        const fileReader = new FileReader()
-        fileReader.onload = function () {
-          results = fileReader.result
-          const lines = results.split('\n')
-          results = lines.pop() // In case the line did not end yet.
-          linecount += lines.length
-
-          if (linecount > maxlines) {
-            // Read too many lines? Truncate the results.
-            lines.length -= linecount - maxlines
-            linecount = maxlines
-          }
-
-          for (let i = 0; i < lines.length; ++i) {
-            forEachLine(lines[i] + '\n')
-          }
-          offset += CHUNK_SIZE
-          seek()
-        }
-        fileReader.onerror = function () {
-          onComplete(fileReader.error)
-        }
-        seek()
-
-        function seek () {
-          if (linecount === maxlines) {
-            // We found enough lines.
-            onComplete() // Done.
-            return
-          }
-          if (offset !== 0 && offset >= file.size) {
-            // We did not find all lines, but there are no more lines.
-            forEachLine(results) // This is from lines.pop(), before.
-            onComplete() // Done
-            return
-          }
-          var slice = file.slice(offset, offset + CHUNK_SIZE)
-          fileReader.readAsText(slice)
-        }
       }
     },
     computed: {
