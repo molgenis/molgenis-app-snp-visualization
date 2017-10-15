@@ -74,10 +74,10 @@
   import { mapState } from 'vuex'
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import Chromosome from './Chromosome'
-  import * as d3 from 'd3'
   import { saveSvgAsPng } from 'save-svg-as-png'
   import lineReader from '../service/lineReader'
   import identityByDecent from '../service/identityByDecent'
+  import plotter from '../service/plotter'
 
   export default {
     name: 'snp-descent-plot',
@@ -104,89 +104,11 @@
     },
     components: {Chromosome},
     methods: {
-      plot (data, plotId, counts, yOffset, svg) {
-        this.status = `Plotting ${plotId}...`
-
-        const timestamp = this.getCurrentDateTime()
-        const dnaNumbers = this.$store.state.parsedDefObj[plotId]
-
-        const height = this.plotSizes.height
-        const width = this.plotSizes.width
-        const titleOffset = this.plotSizes.titleOffset
-        const plotWidth = width * 0.9
-        const plotHeight = height / 2
-
-        const x = d3.scaleLinear(x).range([plotWidth, 0])
-        const y = d3.scaleLinear(y).range([plotHeight, 0])
-        x.domain(d3.extent(data, d => d[0]))
-        y.domain([0, d3.max(data, d => d[1])])
-
-        const yAxisLeft = d3.axisLeft(y).scale(y)
-          .tickFormat(function (d) {
-            return d
-          }).ticks(2)
-
-        const yAxisRight = d3.axisRight(y).scale(y)
-          .tickFormat(function (d) {
-            return counts[d]
-          })
-          .ticks(2)
-        let plotContainer = svg.append('svg').attr('class', 'plot-container')
-        plotContainer.append('g')
-          .attr('transform', `translate(${(parseInt(plotWidth) + 32)},${yOffset + 50})`)
-          .attr('height', height)
-          .call(yAxisRight)
-
-        plotContainer.append('g')
-          .attr('transform', `translate(30,${yOffset + 50})`)
-          .attr('height', height)
-          .call(yAxisLeft)
-
-        plotContainer.selectAll('dot').data(data).enter().append('circle')
-          .attr('r', 1)
-          .attr('cx', d => x(d[0]))
-          .attr('cy', d => y(d[1]) + ((Math.random() - 0.5) * 20))
-          .attr('transform', `translate(32,${yOffset + 50})`)
-
-        plotContainer.append('text')
-          .attr('x', width / 2)
-          .attr('y', titleOffset + yOffset)
-          .attr('text-anchor', 'middle')
-          .attr('font-family', 'sans-serif')
-          .text(`Chromosome ${this.selectedChromosome} : ${plotId} (${dnaNumbers[0]}-${dnaNumbers[1]})`)
-        plotContainer.append('text')
-          .attr('x', plotWidth - 50)
-          .attr('y', titleOffset + yOffset)
-          .style('fill', 'grey')
-          .style('font-size', '10px')
-          .attr('font-family', 'sans-serif')
-          .text(timestamp)
-        plotContainer.append('rect')
-          .attr('x', 0)
-          .attr('y', yOffset)
-          .attr('height', height)
-          .attr('width', width)
-          .style('fill', 'none')
-          .style('stroke', 'black')
-          .style('stroke-width', 1)
-      },
       hidePlots () {
         this.isDisplayPlots = false
       },
       setDisableProcess () {
         this.disableProcess = !(this.dataFile && this.hasDefFile)
-      },
-      getCurrentDateTime () {
-        let currentDate = new Date()
-        let minutes = currentDate.getMinutes()
-        if (minutes < 10) {
-          minutes = '0' + minutes.toString()
-        }
-        return currentDate.getDate() + '/' +
-          (currentDate.getMonth() + 1) + '/' +
-          currentDate.getFullYear() + ' @ ' +
-          currentDate.getHours() + ':' +
-          minutes
       },
       onDownloadButtonClick () {
         const svgElements = document.querySelectorAll('div>.plots-container>svg')
@@ -197,7 +119,7 @@
       clear () {
         this.results = {}
         this.isDisplayPlots = false
-        d3.selectAll('.plot-container').remove()
+        plotter.clear()
         this.isReadyToDownLoad = false
         this.isLoading = false
         this.status = ''
@@ -219,7 +141,7 @@
         this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
-        const maxLines = 1000
+        const maxLines = 1000000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       storeData (event) {
@@ -254,18 +176,8 @@
       },
       onComplete () {
         this.t1 = performance.now()
-        const numberOfCombinations = Object.keys(this.$store.state.dataIndex).length
-        const height = this.plotSizes.height
-        const bottomMargin = this.plotSizes.bottomMargin
-        const svg = d3.select('svg')
-          .attr('width', 1000)
-          .attr('height', ((height + bottomMargin) * numberOfCombinations) + 120)
-          .attr('id', 'plots')
-        let yOffset = 70
-        for (let combination in this.$store.state.dataIndex) {
-          this.plot(this.results[combination].points, combination, this.results[combination].counts, yOffset, svg)
-          yOffset += height + bottomMargin
-        }
+        this.status = 'Plotting ' // ${combination}...`
+        plotter.plotIdentityByDecent(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome)
         this.isLoading = false
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
@@ -301,9 +213,11 @@
         const combinations = Object.keys(parsedDefData)
         let dataIndex = {}
         for (let combination of combinations) {
-          const gPos1 = columnHeaders.indexOf(parsedDefData[combination][0] + '.GType')
-          const gPos2 = columnHeaders.indexOf(parsedDefData[combination][1] + '.GType')
-          dataIndex[combination] = {gPos1, gPos2}
+          const gPosColumnNr1 = parsedDefData[combination][0]
+          const gPos1 = columnHeaders.indexOf(gPosColumnNr1 + '.GType')
+          const gPosColumnNr2 = parsedDefData[combination][1]
+          const gPos2 = columnHeaders.indexOf(gPosColumnNr2 + '.GType')
+          dataIndex[combination] = {gPos1, gPosColumnNr1, gPos2, gPosColumnNr2}
         }
         return dataIndex
       }
