@@ -92,7 +92,6 @@
         hasDefFile: false,
         t0: undefined,
         t1: undefined,
-        results: {},
         selectedChromosome: '1',
         plotSizes: {
           height: 300,
@@ -103,6 +102,9 @@
       }
     },
     components: {Chromosome},
+    created: function () {
+      this.results = {}
+    },
     methods: {
       hidePlots () {
         this.isDisplayPlots = false
@@ -117,7 +119,6 @@
         saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
       clear () {
-        this.results = {}
         this.isDisplayPlots = false
         plotter.clear()
         this.isReadyToDownLoad = false
@@ -178,6 +179,7 @@
         this.t1 = performance.now()
         this.status = 'Plotting ' // ${combination}...`
         plotter.plotIdentityByDecent(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome)
+        this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
