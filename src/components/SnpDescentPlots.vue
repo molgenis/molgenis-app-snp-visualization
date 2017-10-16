@@ -78,6 +78,7 @@
   import lineReader from '../service/lineReader'
   import identityByDecent from '../service/identityByDecent'
   import plotter from '../service/plotter'
+  import dataDefinition from '../service/dataDefinition'
 
   export default {
     name: 'snp-descent-plot',
@@ -125,17 +126,6 @@
         this.isLoading = false
         this.status = ''
       },
-      calculatePlotCombinations (defs) {
-        const keys = Object.keys(defs)
-        let results = {}
-        for (let i = 0; i < keys.length - 1; i++) {
-          // This is where you'll capture that last value
-          for (let j = i + 1; j < keys.length; j++) {
-            results[`${keys[i]}-${keys[j]}`] = [defs[keys[i]], defs[keys[j]]]
-          }
-        }
-        return results
-      },
       onProcessData () {
         this.clear()
         this.isLoading = true
@@ -168,7 +158,7 @@
           }
         } else if (columns[0] === 'Name') {
           const parsedDefData = this.$store.state.parsedDefObj
-          const dataIndex = this.buildDataIndex(parsedDefData, columns)
+          const dataIndex = dataDefinition.buildDataIndex(parsedDefData, columns)
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           for (let combination in dataIndex) {
             this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
@@ -184,17 +174,6 @@
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
       },
-      readDefinitionLines (lineData) {
-        let defObj = {}
-        const lines = lineData.split('\n')
-        const columns = lines[0].replace(/\r/g, '').split('\t')
-        columns.shift()
-        const defs = lines[1].replace(/\r/g, '').split('\t')
-        for (let i = 0; i < columns.length; i++) {
-          defObj[columns[i]] = defs[i + 1]
-        }
-        return defObj
-      },
       parseDefinitionFile (event) {
         const file = event.target.files[0]
         if (file) {
@@ -202,26 +181,14 @@
           const self = this
           const reader = new FileReader()
           reader.onload = function () {
-            const defObj = self.readDefinitionLines(reader.result)
-            self.$store.commit(SET_PARSED_DEF_OBJ, self.calculatePlotCombinations(defObj))
+            const defObj = dataDefinition.readDefinitionLines(reader.result)
+            self.$store.commit(SET_PARSED_DEF_OBJ, dataDefinition.calculatePlotCombinations(defObj))
           }
           reader.readAsText(file)
         } else {
           this.hasDefFile = false
           this.setDisableProcess()
         }
-      },
-      buildDataIndex (parsedDefData, columnHeaders) {
-        const combinations = Object.keys(parsedDefData)
-        let dataIndex = {}
-        for (let combination of combinations) {
-          const gPosColumnNr1 = parsedDefData[combination][0]
-          const gPos1 = columnHeaders.indexOf(gPosColumnNr1 + '.GType')
-          const gPosColumnNr2 = parsedDefData[combination][1]
-          const gPos2 = columnHeaders.indexOf(gPosColumnNr2 + '.GType')
-          dataIndex[combination] = {gPos1, gPosColumnNr1, gPos2, gPosColumnNr2}
-        }
-        return dataIndex
       }
     },
     computed: {
