@@ -106,6 +106,7 @@
     },
     methods: {
       onDefinitionFileInputChanged (event) {
+        this.clear()
         const file = event.target.files[0]
         if (file) {
           this.hasDefFile = true
@@ -121,10 +122,14 @@
         }
       },
       onDataFileInputChanged (event) {
+        this.clear()
         this.dataFile = event.target.files[0]
       },
       onChromosomeSelectChanged () {
         this.isDisplayPlots = false
+        this.isReadyToDownLoad = false
+        this.isLoading = false
+        this.status = ''
       },
       onProcessBtnClicked () {
         this.clear()
@@ -142,8 +147,8 @@
         saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
       clear () {
-        this.isDisplayPlots = false
         plotter.clear()
+        this.isDisplayPlots = false
         this.isReadyToDownLoad = false
         this.isLoading = false
         this.status = ''
