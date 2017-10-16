@@ -6,15 +6,15 @@
         <form>
           <div class="form-group">
             <label for="devFileInput">Definition file</label>
-            <input class="form-control" id="devFileInput" type="file" @change="parseDefinitionFile">
+            <input class="form-control" id="devFileInput" type="file" @change="onDefinitionFileInputChanged">
           </div>
           <div class="form-group">
             <label for="snpFileInput">Data file</label>
-            <input class="form-control" id="snpFileInput" type="file" @change="storeData">
+            <input class="form-control" id="snpFileInput" type="file" @change="onDataFileInputChanged">
           </div>
           <div class="form-group">
             <label for="selectChromosome">Chromosome</label>
-            <select class="form-control" id="selectChromosome" v-model="selectedChromosome" @change="hidePlots">
+            <select class="form-control" id="selectChromosome" v-model="selectedChromosome" @change="onChromosomeSelectChanged">
               <option>1</option>
               <option>2</option>
               <option>3</option>
@@ -41,8 +41,8 @@
               <option>Y</option>
             </select>
           </div>
-          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessData" :disabled="disableProcess">Process data</button>
-          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadButtonClick" :disabled="!isReadyToDownLoad">
+          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked" :disabled="disableProcess">Process data</button>
+          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadBtnClicked" :disabled="!isReadyToDownLoad">
             <i class="fa fa-download" aria-hidden="true"></i>
           </button>
           <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i
@@ -107,26 +107,30 @@
       this.results = {}
     },
     methods: {
-      hidePlots () {
+      onDefinitionFileInputChanged (event) {
+        const file = event.target.files[0]
+        if (file) {
+          this.hasDefFile = true
+          const self = this
+          const reader = new FileReader()
+          reader.onload = function () {
+            const defObj = dataDefinition.readDefinitionLines(reader.result)
+            self.$store.commit(SET_PARSED_DEF_OBJ, dataDefinition.calculatePlotCombinations(defObj))
+          }
+          reader.readAsText(file)
+        } else {
+          this.hasDefFile = false
+          this.setDisableProcess()
+        }
+      },
+      onDataFileInputChanged (event) {
+        this.dataFile = event.target.files[0]
+        this.setDisableProcess()
+      },
+      onChromosomeSelectChanged () {
         this.isDisplayPlots = false
       },
-      setDisableProcess () {
-        this.disableProcess = !(this.dataFile && this.hasDefFile)
-      },
-      onDownloadButtonClick () {
-        const svgElements = document.querySelectorAll('div>.plots-container>svg')
-        const timestamp = this.getCurrentDateTime().replace(/ /g, '_')
-        const name = `${timestamp}.png`
-        saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
-      },
-      clear () {
-        this.isDisplayPlots = false
-        plotter.clear()
-        this.isReadyToDownLoad = false
-        this.isLoading = false
-        this.status = ''
-      },
-      onProcessData () {
+      onProcessBtnClicked () {
         this.clear()
         this.isLoading = true
         this.isDisplayPlots = true
@@ -135,9 +139,21 @@
         const maxLines = 1000000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
-      storeData (event) {
-        this.dataFile = event.target.files[0]
-        this.setDisableProcess()
+      onDownloadBtnClicked () {
+        const svgElements = document.querySelectorAll('div>.plots-container>svg')
+        const timestamp = this.getCurrentDateTime().replace(/ /g, '_')
+        const name = `${timestamp}.png`
+        saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
+      },
+      setDisableProcess () {
+        this.disableProcess = !(this.dataFile && this.hasDefFile)
+      },
+      clear () {
+        this.isDisplayPlots = false
+        plotter.clear()
+        this.isReadyToDownLoad = false
+        this.isLoading = false
+        this.status = ''
       },
       isSelectedChromosome (columns) {
         return columns[1] === this.selectedChromosome
@@ -173,22 +189,6 @@
         this.isLoading = false
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
-      },
-      parseDefinitionFile (event) {
-        const file = event.target.files[0]
-        if (file) {
-          this.hasDefFile = true
-          const self = this
-          const reader = new FileReader()
-          reader.onload = function () {
-            const defObj = dataDefinition.readDefinitionLines(reader.result)
-            self.$store.commit(SET_PARSED_DEF_OBJ, dataDefinition.calculatePlotCombinations(defObj))
-          }
-          reader.readAsText(file)
-        } else {
-          this.hasDefFile = false
-          this.setDisableProcess()
-        }
       }
     },
     computed: {
