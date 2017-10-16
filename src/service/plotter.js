@@ -98,5 +98,6 @@ export default {
   },
   clear () {
     d3.selectAll('.plot-container').remove()
-  }
+  },
+  buildTimeStamp
 }

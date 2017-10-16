@@ -141,7 +141,7 @@
       },
       onDownloadBtnClicked () {
         const svgElements = document.querySelectorAll('div>.plots-container>svg')
-        const timestamp = this.getCurrentDateTime().replace(/ /g, '_')
+        const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
         const name = `${timestamp}.png`
         saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
