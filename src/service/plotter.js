@@ -1,15 +1,43 @@
 import * as d3 from 'd3'
 
+// Max position per chromosome, used to determine plot domain on x axis, Min position is always 0
+const maxPositionMap = {
+  '1': 249250621,
+  '2': 243199373,
+  '3': 198022430,
+  '4': 191154276,
+  '5': 180915260,
+  '6': 171115067,
+  '7': 159138663,
+  '8': 146364022,
+  '9': 141213431,
+  '10': 135534747,
+  '11': 135006516,
+  '12': 133851895,
+  '13': 115169878,
+  '14': 107349540,
+  '15': 102531392,
+  '16': 90354753,
+  '17': 81195210,
+  '18': 78077248,
+  '19': 59128983,
+  '20': 63025520,
+  '21': 48129895,
+  '22': 51304566,
+  'X': 155270560,
+  'Y': 59373566
+}
+
 function plot (plotId, data, yOffset, svgElement, plotSizes, plotTitle) {
   const points = data[plotId].points
   const counts = data[plotId].counts
 
   const timestamp = buildTimeStamp()
-  const x = d3.scaleLinear(x).range([plotSizes.plotWidth, 0])
+  const x = d3.scaleLinear(x).range([0, plotSizes.plotWidth])
   const y = d3.scaleLinear(y).range([plotSizes.plotHeight, 0])
 
-  x.domain(d3.extent(points, d => d[0]))
-  y.domain([0, d3.max(points, d => d[1])])
+  x.domain([0, plotSizes.maximunPostion])
+  y.domain([0, 2])
 
   let plotContainer = svgElement.append('svg').attr('class', 'plot-container')
 
@@ -81,6 +109,8 @@ export default {
   plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome) {
     plotSizes.plotWidth = plotSizes.width * 0.9
     plotSizes.plotHeight = plotSizes.height / 2
+    plotSizes.minimumPostion = 0
+    plotSizes.maximunPostion = maxPositionMap[selectedChromosome]
     const numberOfCombinations = Object.keys(dataIndex).length
     const svgElement = d3.select('svg')
       .attr('width', 1000)
@@ -91,7 +121,7 @@ export default {
     for (let plotId in dataIndex) {
       const geneColumnNr1 = dataIndex[plotId].gPosColumnNr1
       const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
-      const plotTitle = `Chromosome ${selectedChromosome} : ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
+      const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
       plot(plotId, data, yOffset, svgElement, plotSizes, plotTitle)
       yOffset += plotSizes.height + plotSizes.bottomMargin
     }
