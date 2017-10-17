@@ -1,5 +1,5 @@
 import jquery from 'jquery-slim'
-// const arc = 2 * Math.PI
+const arc = 2 * Math.PI
 
 // Max position per chromosome, used to determine plot domain on x axis, Min position is always 0
 const maxPositionMap = {
@@ -119,6 +119,7 @@ function drawPoint (context, x, y) {
 
 function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, timeStamp) {
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
+  context.fillStyle = 'black'
   // draw border
   context.strokeRect(plotSizes.marginLeft, yOffset, plotSizes.width, plotSizes.height)
 
@@ -147,10 +148,22 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, tim
     // console.log(`position: ${position}, score: ${score}`)
     const jitter = (Math.random() - 0.5) * plotSizes.bandWidth
     const x = plotXStart + Math.floor(position * plotSizes.xScale)
-    const y = Math.floor(invertedYCorrection - ((score + 1) * plotSizes.bandDistance) + jitter)
+    const y = Math.floor(invertedYCorrection - ((score) * plotSizes.bandDistance) + jitter)
     // console.log(`x: ${x}, y: ${y}`)
     drawPoint(context, x, y)
   }
+
+  // draw left snp score axis
+  context.fillStyle = 'blue'
+  const axisLength = 3 * plotSizes.bandDistance
+  const leftAxisYStart = invertedYCorrection - axisLength
+  context.fillRect(plotXStart, leftAxisYStart, 2, axisLength) // point as 2 by 2 cube
+  console.log(`left axis x start: ${plotXStart}, y start: ${leftAxisYStart}, width: 2, length: ${axisLength}`)
+
+  // draw yellow dot
+  context.fillStyle = 'yellow'
+  context.arc(plotXStart, invertedYCorrection, 5, 0, arc, false)
+  context.fill()
 }
 
 export default {
