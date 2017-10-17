@@ -71,7 +71,6 @@
   }
 </style>
 <script>
-  import { mapState } from 'vuex'
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import Chromosome from './Chromosome'
   import { saveSvgAsPng } from 'save-svg-as-png'
@@ -85,7 +84,6 @@
     data: function () {
       return {
         isDisplayPlots: false,
-        disableProcess: true,
         isReadyToDownLoad: false,
         isLoading: false,
         status: '',
@@ -108,6 +106,7 @@
     },
     methods: {
       onDefinitionFileInputChanged (event) {
+        this.clear()
         const file = event.target.files[0]
         if (file) {
           this.hasDefFile = true
@@ -120,15 +119,17 @@
           reader.readAsText(file)
         } else {
           this.hasDefFile = false
-          this.setDisableProcess()
         }
       },
       onDataFileInputChanged (event) {
+        this.clear()
         this.dataFile = event.target.files[0]
-        this.setDisableProcess()
       },
       onChromosomeSelectChanged () {
         this.isDisplayPlots = false
+        this.isReadyToDownLoad = false
+        this.isLoading = false
+        this.status = ''
       },
       onProcessBtnClicked () {
         this.clear()
@@ -145,12 +146,9 @@
         const name = `${timestamp}.png`
         saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
-      setDisableProcess () {
-        this.disableProcess = !(this.dataFile && this.hasDefFile)
-      },
       clear () {
-        this.isDisplayPlots = false
         plotter.clear()
+        this.isDisplayPlots = false
         this.isReadyToDownLoad = false
         this.isLoading = false
         this.status = ''
@@ -192,7 +190,9 @@
       }
     },
     computed: {
-      ...mapState(['message'])
+      disableProcess: function () {
+        return !(this.dataFile && this.hasDefFile)
+      }
     }
   }
 </script>
