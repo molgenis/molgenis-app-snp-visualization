@@ -59,6 +59,13 @@
         </div>
       </div>
     </div>
+
+    <div class="row">
+      <div id="canvas-container" class="col">
+        <canvas id="plot-canvas"></canvas>
+      </div>
+    </div>
+
   </div>
 </template>
 <style>
@@ -91,17 +98,23 @@
         hasDefFile: false,
         t0: undefined,
         t1: undefined,
-        selectedChromosome: '1',
-        plotSizes: {
-          height: 300,
-          width: 1000,
-          bottomMargin: 30,
-          titleOffset: 25
-        }
+        selectedChromosome: '1'
       }
     },
     components: {Chromosome},
     created: function () {
+      this.plotSizes = {
+        height: 300,
+        width: 1000,
+        marginLeft: 25,
+        marginRight: 25,
+        marginBottom: 30,
+        paddingLeft: 25,
+        paddingRight: 25,
+        bandWidth: 20,
+        bandDistance: 50,
+        titleOffset: 25
+      }
       this.results = {}
     },
     methods: {
