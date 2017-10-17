@@ -117,7 +117,7 @@ function drawPoint (context, x, y) {
   context.fillRect(x, y, 2, 2) // point as 2 by 2 cube
 }
 
-function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle) {
+function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, timeStamp) {
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
   // draw border
   context.strokeRect(plotSizes.marginLeft, yOffset, plotSizes.width, plotSizes.height)
@@ -127,12 +127,19 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle) {
   const textLength = 50 // temp value for now
   const textXOffSet = Math.floor(textLength / 2)
   const textY = yOffset + plotSizes.titleOffset
+  context.font = '12px sans-serif'
   context.fillText(plotTitle, plotCenter - textXOffSet, textY)
+
+  // draw time stamp
+  const timeStampLength = 10 // temp value for now
+  const timeStampX = plotSizes.plotWidth - plotSizes.paddingRight - timeStampLength
+  context.fillStyle = 'grey'
+  context.fillText(timeStamp, timeStampX, textY)
 
   // draw plot
   const plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom - (plotSizes.bandWidth / 2)
-  context.fillStyle = 'rgba("0","0","0","1")'
+  context.fillStyle = 'black'
   console.log(`invertedYCorrection: ${invertedYCorrection}`)
   for (let i = points.length - 1; i >= 0; i--) {
     const position = points[i][0]
@@ -152,6 +159,7 @@ export default {
     plotSizes.plotHeight = plotSizes.height / 2
     plotSizes.xScale = (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight) / maxPositionMap[selectedChromosome]
     const numberOfCombinations = Object.keys(dataIndex).length
+    const timeStamp = buildTimeStamp()
     const canvas = document.getElementById('plot-canvas')
     canvas.width = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
     canvas.height = ((plotSizes.height + plotSizes.marginBottom) * numberOfCombinations) + 120
@@ -163,7 +171,7 @@ export default {
       const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
       const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
       // plot(plotId, data, yOffset, svgElement, plotSizes, plotTitle)
-      canvasPlot(plotId, data[plotId].points, yOffset, context, plotSizes, plotTitle)
+      canvasPlot(plotId, data[plotId].points, yOffset, context, plotSizes, plotTitle, timeStamp)
       yOffset += plotSizes.height + plotSizes.marginBottom
     }
   },
