@@ -1,4 +1,5 @@
-import * as d3 from 'd3'
+import jquery from 'jquery-slim'
+// const arc = 2 * Math.PI
 
 // Max position per chromosome, used to determine plot domain on x axis, Min position is always 0
 const maxPositionMap = {
@@ -105,15 +106,33 @@ function buildTimeStamp () {
     minutes
 }
 
+// function drawCircle (context, x, y) {
+//   // context.beginPath()
+//   context.arc(x, y, 2, 0, arc, false)
+//   // context.stroke()
+//   // context.closePath()
+// }
+
+function drawPoint (context, x, y) {
+  context.fillRect(x, y, 2, 2) // point as 2 by 2 cube
+}
+
 function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle) {
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
   // draw border
   context.strokeRect(plotSizes.marginLeft, yOffset, plotSizes.width, plotSizes.height)
 
+  // draw title
+  const plotCenter = Math.floor(plotSizes.plotWidth / 2)
+  const textLength = 50 // temp value for now
+  const textXOffSet = Math.floor(textLength / 2)
+  const textY = yOffset + plotSizes.titleOffset
+  context.fillText(plotTitle, plotCenter - textXOffSet, textY)
+
   // draw plot
   const plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
-  // const arc = 2 * Math.PI
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom - (plotSizes.bandWidth / 2)
+  context.fillStyle = 'rgba("0","0","0","1")'
   console.log(`invertedYCorrection: ${invertedYCorrection}`)
   for (let i = points.length - 1; i >= 0; i--) {
     const position = points[i][0]
@@ -123,13 +142,8 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle) {
     const x = plotXStart + Math.floor(position * plotSizes.xScale)
     const y = Math.floor(invertedYCorrection - ((score + 1) * plotSizes.bandDistance) + jitter)
     // console.log(`x: ${x}, y: ${y}`)
-    // context.beginPath()
-    // context.arc(x, y, 2, 0, arc, false)
-    // context.stroke()
-    context.fillStyle = 'rgba("0","0","0","1")'
-    context.fillRect(x, y, 2, 2)
+    drawPoint(context, x, y)
   }
-  // context.closePath()
 }
 
 export default {
@@ -154,7 +168,8 @@ export default {
     }
   },
   clear () {
-    d3.selectAll('.plot-container').remove()
+    jquery('#plot-canvas').remove()
+    jquery('#canvas-container').append('<canvas id="plot-canvas"></canvas>')
   },
   buildTimeStamp
 }

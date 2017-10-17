@@ -3691,6 +3691,10 @@ istanbul@^0.4.0:
     which "^1.1.1"
     wordwrap "^1.0.0"
 
+jquery-slim@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/jquery-slim/-/jquery-slim-3.0.0.tgz#87ab2fa10501798e93124a4b5eb953c85379707e"
+
 js-base64@^2.1.8, js-base64@^2.1.9:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.3.2.tgz#a79a923666372b580f8e27f51845c6f7e8fbfbaf"

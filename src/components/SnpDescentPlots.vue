@@ -139,6 +139,7 @@
         this.dataFile = event.target.files[0]
       },
       onChromosomeSelectChanged () {
+        plotter.clear()
         this.isDisplayPlots = false
         this.isReadyToDownLoad = false
         this.isLoading = false
