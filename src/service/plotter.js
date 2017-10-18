@@ -208,7 +208,7 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
     const bandLabel = band[2]
     const evenOrOdd = isEvenOrOdd(i)
     const labelPos = getLabelPos(i)
-    if (i === 0 || band[1] === centerPosition) {
+    if (i === 0 || band[0] === centerPosition) {
       // Draw left round rect
       // drawChromText(chromosomeContainer, fontsize, band[2], id, 10, 0)
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, leftRadius)
