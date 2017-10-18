@@ -50,15 +50,6 @@
         </form>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
-        <div id="plot" class="plots-container" v-show="isDisplayPlots">
-         <svg>
-          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome"></chromosome>
-         </svg>
-        </div>
-      </div>
-    </div>
 
     <div class="row">
       <div id="canvas-container" class="col">
@@ -109,11 +100,14 @@
         marginLeft: 25,
         marginRight: 25,
         marginBottom: 30,
+        marginTop: 30,
         paddingLeft: 50,
         paddingRight: 50,
         bandWidth: 20,
         bandDistance: 50,
-        titleOffset: 25
+        titleOffset: 25,
+        chromosomeBarHeight: 25,
+        chromosomeBarRadius: 12
       }
       this.results = {}
     },
@@ -151,7 +145,7 @@
         this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
-        const maxLines = 1000000
+        const maxLines = 1000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       onDownloadBtnClicked () {
@@ -196,7 +190,8 @@
       onComplete () {
         this.t1 = performance.now()
         this.status = 'Plotting ' // ${combination}...`
-        plotter.plotIdentityByDecent(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome)
+        const plotFunction = plotter.plotIdentityByDecent
+        plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
