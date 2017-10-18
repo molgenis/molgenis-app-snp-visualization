@@ -183,9 +183,8 @@ function roundRect (context, x, y, width, height, radius, fill, stroke) {
 
 function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, y, x, bandLabel) {
   console.log(`y: ${y}, x: ${x}, bandLabel: ${bandLabel}`)
-  if (evenOrOdd === 'even') {
-    context.strokeRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
-  } else {
+  context.strokeRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
+  if (evenOrOdd === 'odd') {
     context.fillRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   }
 }
