@@ -20,6 +20,7 @@
     "folder-zip": "^0.0.5",
     "font-awesome": "^4.7.0",
     "html-loader": "^0.5.1",
+    "jquery-slim": "^3.0.0",
     "save-svg-as-png": "^1.2.0",
     "vue": "^2.2.6",
     "vue-router": "^2.3.1",

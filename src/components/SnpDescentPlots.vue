@@ -50,15 +50,13 @@
         </form>
       </div>
     </div>
+
     <div class="row">
-      <div class="col">
-        <div id="plot" class="plots-container" v-show="isDisplayPlots">
-         <svg>
-          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome"></chromosome>
-         </svg>
-        </div>
+      <div id="canvas-container" class="col">
+        <canvas id="plot-canvas"></canvas>
       </div>
     </div>
+
   </div>
 </template>
 <style>
@@ -91,17 +89,26 @@
         hasDefFile: false,
         t0: undefined,
         t1: undefined,
-        selectedChromosome: '1',
-        plotSizes: {
-          height: 300,
-          width: 1000,
-          bottomMargin: 30,
-          titleOffset: 25
-        }
+        selectedChromosome: '1'
       }
     },
     components: {Chromosome},
     created: function () {
+      this.plotSizes = {
+        height: 250,
+        width: 1075,
+        marginLeft: 25,
+        marginRight: 25,
+        marginBottom: 30,
+        marginTop: 30,
+        paddingLeft: 50,
+        paddingRight: 50,
+        bandWidth: 20,
+        bandDistance: 50,
+        titleOffset: 25,
+        chromosomeBarHeight: 25,
+        chromosomeBarRadius: 12
+      }
       this.results = {}
     },
     methods: {
@@ -126,6 +133,7 @@
         this.dataFile = event.target.files[0]
       },
       onChromosomeSelectChanged () {
+        plotter.clear()
         this.isDisplayPlots = false
         this.isReadyToDownLoad = false
         this.isLoading = false
@@ -137,7 +145,7 @@
         this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
-        const maxLines = 1000000
+        const maxLines = 1000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       onDownloadBtnClicked () {
@@ -182,7 +190,8 @@
       onComplete () {
         this.t1 = performance.now()
         this.status = 'Plotting ' // ${combination}...`
-        plotter.plotIdentityByDecent(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome)
+        const plotFunction = plotter.plotIdentityByDecent
+        plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true

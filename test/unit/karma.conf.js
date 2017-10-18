@@ -15,17 +15,6 @@ module.exports = function (config) {
     webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: true
-    },
-    coverageReporter: {
-      dir: '../../../../../target/generated-sources/coverage',
-      reporters: [
-        {type: 'cobertura', subdir: 'cobertura'}
-      ]
-    },
-    junitReporter: {
-      outputDir: '../../../../../target/surefire-reports',
-      outputFile: 'TEST-results.xml',
-      useBrowserName: false
     }
   })
 }
