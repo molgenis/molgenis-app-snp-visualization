@@ -1,5 +1,5 @@
 import jquery from 'jquery-slim'
-const arc = 2 * Math.PI
+// const arc = 2 * Math.PI
 
 // Max position per chromosome, used to determine plot domain on x axis, Min position is always 0
 const maxPositionMap = {
@@ -119,51 +119,62 @@ function drawPoint (context, x, y) {
 
 function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, timeStamp) {
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
-  context.fillStyle = 'black'
+
+  const plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
+  const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
+  const tickLabelOffset = 5
+  const axisWidth = 1
+  const twoScoreY = invertedYCorrection - (3 * plotSizes.bandDistance + (plotSizes.bandWidth * 0.5))
+  const oneScoreY = invertedYCorrection - (2 * plotSizes.bandDistance + (plotSizes.bandWidth * 0.5))
+  const zeroScoreY = invertedYCorrection - (plotSizes.bandDistance + (plotSizes.bandWidth * 0.5))
+  const ncScoreY = invertedYCorrection - (plotSizes.bandWidth * 0.5)
+  console.log(`invertedYCorrection: ${invertedYCorrection}`)
   // draw border
+  context.fillStyle = 'black'
   context.strokeRect(plotSizes.marginLeft, yOffset, plotSizes.width, plotSizes.height)
 
   // draw title
   const plotCenter = Math.floor(plotSizes.plotWidth / 2)
-  const textLength = 50 // temp value for now
-  const textXOffSet = Math.floor(textLength / 2)
   const textY = yOffset + plotSizes.titleOffset
+  context.textAlign = 'center'
   context.font = '12px sans-serif'
-  context.fillText(plotTitle, plotCenter - textXOffSet, textY)
+  context.fillText(plotTitle, plotCenter, textY)
 
   // draw time stamp
-  const timeStampLength = 10 // temp value for now
-  const timeStampX = plotSizes.plotWidth - plotSizes.paddingRight - timeStampLength
+  const timeStampX = plotSizes.plotWidth - plotSizes.paddingRight
   context.fillStyle = 'grey'
+  context.textAlign = 'end'
   context.fillText(timeStamp, timeStampX, textY)
 
   // draw plot
-  const plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
-  const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom - (plotSizes.bandWidth / 2)
   context.fillStyle = 'black'
-  console.log(`invertedYCorrection: ${invertedYCorrection}`)
   for (let i = points.length - 1; i >= 0; i--) {
     const position = points[i][0]
     const score = points[i][1] + 1 // plus one to normalize [-1, 2] to [0, 3]
     // console.log(`position: ${position}, score: ${score}`)
     const jitter = (Math.random() - 0.5) * plotSizes.bandWidth
     const x = plotXStart + Math.floor(position * plotSizes.xScale)
-    const y = Math.floor(invertedYCorrection - ((score) * plotSizes.bandDistance) + jitter)
+    const y = Math.floor(invertedYCorrection - (0.5 * plotSizes.bandWidth) - ((score) * plotSizes.bandDistance) + jitter)
     // console.log(`x: ${x}, y: ${y}`)
     drawPoint(context, x, y)
   }
 
   // draw left snp score axis
-  context.fillStyle = 'blue'
-  const axisLength = 3 * plotSizes.bandDistance
+  context.fillStyle = 'grey'
+  const axisLength = 3 * plotSizes.bandDistance + plotSizes.bandWidth
   const leftAxisYStart = invertedYCorrection - axisLength
-  context.fillRect(plotXStart, leftAxisYStart, 2, axisLength) // point as 2 by 2 cube
-  console.log(`left axis x start: ${plotXStart}, y start: ${leftAxisYStart}, width: 2, length: ${axisLength}`)
-
-  // draw yellow dot
-  context.fillStyle = 'yellow'
-  context.arc(plotXStart, invertedYCorrection, 5, 0, arc, false)
-  context.fill()
+  const leftTickLabelX = plotXStart - tickLabelOffset
+  context.fillRect(plotXStart, leftAxisYStart, axisWidth, axisLength)
+  context.textBaseline = 'middle'
+  context.textAlign = 'end'
+  context.fillRect(leftTickLabelX, twoScoreY, tickLabelOffset, axisWidth)
+  context.fillRect(leftTickLabelX, oneScoreY, tickLabelOffset, axisWidth)
+  context.fillRect(leftTickLabelX, zeroScoreY, tickLabelOffset, axisWidth)
+  context.fillRect(leftTickLabelX, ncScoreY, tickLabelOffset, axisWidth)
+  context.fillText('2', leftTickLabelX, twoScoreY)
+  context.fillText('1', leftTickLabelX, oneScoreY)
+  context.fillText('0', leftTickLabelX, zeroScoreY)
+  context.fillText('NC', leftTickLabelX, ncScoreY)
 }
 
 export default {
