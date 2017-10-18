@@ -121,6 +121,7 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, tim
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
 
   const plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
+  const plotXEnd = plotXStart + (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight)
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
   const tickLabelOffset = 5
   const axisWidth = 1
@@ -128,20 +129,20 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, tim
   const oneScoreY = invertedYCorrection - (2 * plotSizes.bandDistance + (plotSizes.bandWidth * 0.5))
   const zeroScoreY = invertedYCorrection - (plotSizes.bandDistance + (plotSizes.bandWidth * 0.5))
   const ncScoreY = invertedYCorrection - (plotSizes.bandWidth * 0.5)
-  console.log(`invertedYCorrection: ${invertedYCorrection}`)
+
   // draw border
   context.fillStyle = 'black'
   context.strokeRect(plotSizes.marginLeft, yOffset, plotSizes.width, plotSizes.height)
 
   // draw title
-  const plotCenter = Math.floor(plotSizes.plotWidth / 2)
+  const plotCenter = Math.floor(plotSizes.width / 2)
   const textY = yOffset + plotSizes.titleOffset
   context.textAlign = 'center'
   context.font = '12px sans-serif'
   context.fillText(plotTitle, plotCenter, textY)
 
   // draw time stamp
-  const timeStampX = plotSizes.plotWidth - plotSizes.paddingRight
+  const timeStampX = plotSizes.width - plotSizes.paddingRight
   context.fillStyle = 'grey'
   context.textAlign = 'end'
   context.fillText(timeStamp, timeStampX, textY)
@@ -161,12 +162,12 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, tim
 
   // draw left snp score axis
   context.fillStyle = 'grey'
+  context.textBaseline = 'middle'
+  context.textAlign = 'end'
   const axisLength = 3 * plotSizes.bandDistance + plotSizes.bandWidth
   const leftAxisYStart = invertedYCorrection - axisLength
   const leftTickLabelX = plotXStart - tickLabelOffset
   context.fillRect(plotXStart, leftAxisYStart, axisWidth, axisLength)
-  context.textBaseline = 'middle'
-  context.textAlign = 'end'
   context.fillRect(leftTickLabelX, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, zeroScoreY, tickLabelOffset, axisWidth)
@@ -175,12 +176,25 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, tim
   context.fillText('1', leftTickLabelX, oneScoreY)
   context.fillText('0', leftTickLabelX, zeroScoreY)
   context.fillText('NC', leftTickLabelX, ncScoreY)
+
+  // draw right count score axis
+  context.fillStyle = 'grey'
+  context.textBaseline = 'middle'
+  context.textAlign = 'start'
+  const rightTickLabelX = plotXEnd + tickLabelOffset
+  context.fillRect(plotXEnd, leftAxisYStart, axisWidth, axisLength)
+  context.fillRect(plotXEnd, twoScoreY, tickLabelOffset, axisWidth)
+  context.fillRect(plotXEnd, oneScoreY, tickLabelOffset, axisWidth)
+  context.fillRect(plotXEnd, zeroScoreY, tickLabelOffset, axisWidth)
+  context.fillRect(plotXEnd, ncScoreY, tickLabelOffset, axisWidth)
+  context.fillText('2', rightTickLabelX, twoScoreY)
+  context.fillText('1', rightTickLabelX, oneScoreY)
+  context.fillText('0', rightTickLabelX, zeroScoreY)
+  context.fillText('NC', rightTickLabelX, ncScoreY)
 }
 
 export default {
   plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome) {
-    plotSizes.plotWidth = plotSizes.width * 0.9
-    plotSizes.plotHeight = plotSizes.height / 2
     plotSizes.xScale = (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight) / maxPositionMap[selectedChromosome]
     const numberOfCombinations = Object.keys(dataIndex).length
     const timeStamp = buildTimeStamp()
