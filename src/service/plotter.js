@@ -147,10 +147,7 @@ function plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome, t
   }
 }
 
-function roundRect (context, x, y, width, height, radius, fill, stroke) {
-  if (typeof stroke === 'undefined') {
-    stroke = true
-  }
+function roundRect (context, x, y, width, height, radius, evenOrOdd) {
   if (typeof radius === 'undefined') {
     radius = 5
   }
@@ -173,12 +170,10 @@ function roundRect (context, x, y, width, height, radius, fill, stroke) {
   context.lineTo(x, y + radius.tl)
   context.quadraticCurveTo(x, y, x + radius.tl, y)
   context.closePath()
-  if (fill) {
+  if (evenOrOdd === 'odd') {
     context.fill()
   }
-  if (stroke) {
-    context.stroke()
-  }
+  context.stroke()
 }
 
 function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, y, x, bandLabel) {
@@ -211,10 +206,10 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
     if (i === 0 || band[0] === centerPosition) {
       // Draw left round rect
       // drawChromText(chromosomeContainer, fontsize, band[2], id, 10, 0)
-      roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, leftRadius)
+      roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, leftRadius, evenOrOdd)
     } else if (i === chromosomeData.length - 1 || band[1] === centerPosition) {
-      // last bar draw right round rect
-      roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius)
+      // Draw right round rect
+      roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius, evenOrOdd)
     } else {
       drawChromosomeBand(context, plotSizes, bandWidth, evenOrOdd, labelPos, startX, bandLabel)
     }
