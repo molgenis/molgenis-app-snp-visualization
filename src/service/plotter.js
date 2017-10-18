@@ -117,9 +117,8 @@ function drawPoint (context, x, y) {
   context.fillRect(x, y, 2, 2) // point as 2 by 2 cube
 }
 
-function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, timeStamp) {
+function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
-
   const plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
   const plotXEnd = plotXStart + (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight)
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
@@ -187,10 +186,10 @@ function canvasPlot (plotId, points, yOffset, context, plotSizes, plotTitle, tim
   context.fillRect(plotXEnd, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotXEnd, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotXEnd, ncScoreY, tickLabelOffset, axisWidth)
-  context.fillText('2', rightTickLabelX, twoScoreY)
-  context.fillText('1', rightTickLabelX, oneScoreY)
-  context.fillText('0', rightTickLabelX, zeroScoreY)
-  context.fillText('NC', rightTickLabelX, ncScoreY)
+  context.fillText(counts['2'], rightTickLabelX, twoScoreY)
+  context.fillText(counts['1'], rightTickLabelX, oneScoreY)
+  context.fillText(counts['0'], rightTickLabelX, zeroScoreY)
+  context.fillText(counts['-1'], rightTickLabelX, ncScoreY)
 }
 
 export default {
@@ -209,7 +208,7 @@ export default {
       const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
       const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
       // plot(plotId, data, yOffset, svgElement, plotSizes, plotTitle)
-      canvasPlot(plotId, data[plotId].points, yOffset, context, plotSizes, plotTitle, timeStamp)
+      canvasPlot(plotId, data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
       yOffset += plotSizes.height + plotSizes.marginBottom
     }
   },
