@@ -104,13 +104,13 @@
     components: {Chromosome},
     created: function () {
       this.plotSizes = {
-        height: 300,
-        width: 1000,
+        height: 250,
+        width: 1075,
         marginLeft: 25,
         marginRight: 25,
         marginBottom: 30,
-        paddingLeft: 25,
-        paddingRight: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
         bandWidth: 20,
         bandDistance: 50,
         titleOffset: 25

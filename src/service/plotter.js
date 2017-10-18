@@ -202,30 +202,34 @@ function calculateXScaleCoefficient (width, paddingLeft, paddingRight, maxPositi
   return (width - paddingLeft - paddingRight) / maxPosition
 }
 
-export default {
-  plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome) {
-    plotSizes.xScale = calculateXScaleCoefficient(plotSizes.width, plotSizes.paddingLeft, plotSizes.paddingRight, maxPositionMap[selectedChromosome])
-    const numberOfCombinations = Object.keys(dataIndex).length
-    const timeStamp = buildTimeStamp()
-    const canvas = document.getElementById('plot-canvas')
-    canvas.width = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
-    canvas.height = ((plotSizes.height + plotSizes.marginBottom) * numberOfCombinations) + 120
-    const context = canvas.getContext('2d')
-    let yOffset = 70
+function plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome) {
+  plotSizes.xScale = calculateXScaleCoefficient(plotSizes.width, plotSizes.paddingLeft, plotSizes.paddingRight, maxPositionMap[selectedChromosome])
+  const numberOfCombinations = Object.keys(dataIndex).length
+  const timeStamp = buildTimeStamp()
+  const canvas = document.getElementById('plot-canvas')
+  canvas.width = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
+  canvas.height = ((plotSizes.height + plotSizes.marginBottom) * numberOfCombinations) + 120
+  const context = canvas.getContext('2d')
+  let yOffset = 70
 
-    for (let plotId in dataIndex) {
-      const geneColumnNr1 = dataIndex[plotId].gPosColumnNr1
-      const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
-      const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
-      // plot(plotId, data, yOffset, svgElement, plotSizes, plotTitle)
-      canvasPlot(plotId, data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
-      yOffset += plotSizes.height + plotSizes.marginBottom
-    }
-  },
-  clear () {
-    jquery('#plot-canvas').remove()
-    jquery('#canvas-container').append('<canvas id="plot-canvas"></canvas>')
-  },
+  for (let plotId in dataIndex) {
+    const geneColumnNr1 = dataIndex[plotId].gPosColumnNr1
+    const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
+    const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
+    // plot(plotId, data, yOffset, svgElement, plotSizes, plotTitle)
+    canvasPlot(plotId, data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
+    yOffset += plotSizes.height + plotSizes.marginBottom
+  }
+}
+
+function clear () {
+  jquery('#plot-canvas').remove()
+  jquery('#canvas-container').append('<canvas id="plot-canvas"></canvas>')
+}
+
+export default {
+  plotIdentityByDecent,
+  clear,
   calculateXScaleCoefficient,
   buildTimeStamp
 }
