@@ -54,6 +54,11 @@ function drawPoint (context, x, y) {
   context.fillRect(x, y, 2, 2) // point as 2 by 2 cube
 }
 
+function drawBackgroud (context, x, y, width, height) {
+  context.fillStyle = 'white'
+  context.fillRect(x, y, width, height)
+}
+
 function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
   console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
@@ -159,6 +164,7 @@ function roundRect (context, x, y, width, height, radius, evenOrOdd) {
       radius[side] = radius[side] || defaultRadius[side]
     }
   }
+  context.fillStyle = 'black'
   context.beginPath()
   context.moveTo(x + radius.tl, y)
   context.lineTo(x + width - radius.tr, y)
@@ -178,9 +184,9 @@ function roundRect (context, x, y, width, height, radius, evenOrOdd) {
 
 function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, y, x, bandLabel) {
   console.log(`y: ${y}, x: ${x}, bandLabel: ${bandLabel}, evenOrOdd: ${evenOrOdd}`)
+  context.fillStyle = 'black'
   context.strokeRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   if (evenOrOdd === 'odd') {
-    console.log('fill rect')
     context.fillRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   }
 }
@@ -228,6 +234,9 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   const context = canvas.getContext('2d')
   let yOffset = 70
 
+  const canvasWidth = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
+  const canvasHeight = yOffset + (plotSizes.height + plotSizes.marginBottom) * 4
+  drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
   plotChromosome(plotSizes, selectedChromosome, context, yOffset)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
 }
