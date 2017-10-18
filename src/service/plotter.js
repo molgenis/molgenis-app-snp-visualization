@@ -166,11 +166,14 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   const axisLength = 3 * plotSizes.bandDistance + plotSizes.bandWidth
   const leftAxisYStart = invertedYCorrection - axisLength
   const leftTickLabelX = plotXStart - tickLabelOffset
+  // draw left axis
   context.fillRect(plotXStart, leftAxisYStart, axisWidth, axisLength)
+  // draw ticks
   context.fillRect(leftTickLabelX, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, ncScoreY, tickLabelOffset, axisWidth)
+  // draw tick labels
   context.fillText('2', leftTickLabelX, twoScoreY)
   context.fillText('1', leftTickLabelX, oneScoreY)
   context.fillText('0', leftTickLabelX, zeroScoreY)
@@ -181,20 +184,27 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   context.textBaseline = 'middle'
   context.textAlign = 'start'
   const rightTickLabelX = plotXEnd + tickLabelOffset
+  // draw right axis
   context.fillRect(plotXEnd, leftAxisYStart, axisWidth, axisLength)
+  // draw ticks
   context.fillRect(plotXEnd, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotXEnd, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotXEnd, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotXEnd, ncScoreY, tickLabelOffset, axisWidth)
+  // draw tick labels
   context.fillText(counts['2'], rightTickLabelX, twoScoreY)
   context.fillText(counts['1'], rightTickLabelX, oneScoreY)
   context.fillText(counts['0'], rightTickLabelX, zeroScoreY)
   context.fillText(counts['-1'], rightTickLabelX, ncScoreY)
 }
 
+function calculateXScaleCoefficient (width, paddingLeft, paddingRight, maxPosition) {
+  return (width - paddingLeft - paddingRight) / maxPosition
+}
+
 export default {
   plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome) {
-    plotSizes.xScale = (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight) / maxPositionMap[selectedChromosome]
+    plotSizes.xScale = calculateXScaleCoefficient(plotSizes.width, plotSizes.paddingLeft, plotSizes.paddingRight, maxPositionMap[selectedChromosome])
     const numberOfCombinations = Object.keys(dataIndex).length
     const timeStamp = buildTimeStamp()
     const canvas = document.getElementById('plot-canvas')
@@ -216,5 +226,6 @@ export default {
     jquery('#plot-canvas').remove()
     jquery('#canvas-container').append('<canvas id="plot-canvas"></canvas>')
   },
+  calculateXScaleCoefficient,
   buildTimeStamp
 }
