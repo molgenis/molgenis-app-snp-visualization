@@ -188,6 +188,9 @@ function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, y, x, ban
     context.fillRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   }
 }
+const getLabelPos = (value) => value % 2 === 0 ? value % 4 === 0 ? 7 : 17 : value % 4 === 1 ? 55 : 65
+
+const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
 
 function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
   const chromosomeData = chromosomePositions.getChromosomeData(selectedChromosome)
@@ -202,6 +205,8 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
     let startX = plotSizes.plotXStart + band[0] * plotSizes.xScale
     let bandWidth = (band[1] - band[0]) * plotSizes.xScale
     const bandLabel = band[2]
+    const evenOrOdd = isEvenOrOdd(i)
+    const labelPos = getLabelPos(i)
     if (i === 0) {
       // first bar bar draw left round rect
       // drawChromText(chromosomeContainer, fontsize, band[2], id, 10, 0)
@@ -216,17 +221,7 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
       // draw right round rect
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius)
     } else if (i % 2 === 0) {
-      if (i % 4 === 0) {
-        drawChromosomeBand(context, plotSizes, bandWidth, 'even', 7, startX, bandLabel)
-      } else {
-        drawChromosomeBand(context, plotSizes, bandWidth, 'even', 17, startX, bandLabel)
-      }
-    } else {
-      if (i % 4 === 1) {
-        drawChromosomeBand(context, plotSizes, bandWidth, 'odd', 55, startX, bandLabel)
-      } else {
-        drawChromosomeBand(context, plotSizes, bandWidth, 'odd', 65, startX, bandLabel)
-      }
+      drawChromosomeBand(context, plotSizes, bandWidth, evenOrOdd, labelPos, startX, bandLabel)
     }
   })
 }
@@ -257,5 +252,7 @@ export default {
   clear,
   plotIdentityByDecent,
   calculateXScaleCoefficient,
-  buildTimeStamp
+  buildTimeStamp,
+  isEvenOrOdd,
+  getLabelPos
 }
