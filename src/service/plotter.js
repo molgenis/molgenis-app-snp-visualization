@@ -182,9 +182,10 @@ function roundRect (context, x, y, width, height, radius, fill, stroke) {
 }
 
 function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, y, x, bandLabel) {
-  console.log(`y: ${y}, x: ${x}, bandLabel: ${bandLabel}`)
+  console.log(`y: ${y}, x: ${x}, bandLabel: ${bandLabel}, evenOrOdd: ${evenOrOdd}`)
   context.strokeRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   if (evenOrOdd === 'odd') {
+    console.log('fill rect')
     context.fillRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   }
 }
@@ -207,20 +208,14 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
     const bandLabel = band[2]
     const evenOrOdd = isEvenOrOdd(i)
     const labelPos = getLabelPos(i)
-    if (i === 0) {
-      // first bar bar draw left round rect
+    if (i === 0 || band[1] === centerPosition) {
+      // Draw left round rect
       // drawChromText(chromosomeContainer, fontsize, band[2], id, 10, 0)
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, leftRadius)
-    } else if (i === chromosomeData.length - 1) {
+    } else if (i === chromosomeData.length - 1 || band[1] === centerPosition) {
       // last bar draw right round rect
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius)
-    } else if (band[0] === centerPosition) {
-      // draw left round rect
-      roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, leftRadius)
-    } else if (band[1] === centerPosition) {
-      // draw right round rect
-      roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius)
-    } else if (i % 2 === 0) {
+    } else {
       drawChromosomeBand(context, plotSizes, bandWidth, evenOrOdd, labelPos, startX, bandLabel)
     }
   })
