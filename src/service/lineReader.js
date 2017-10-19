@@ -1,6 +1,6 @@
 export default {
 
-  readSomeLines (file, maxLines, forEachLine, onComplete) {
+  readSomeLines (file, maxLines, forEachLine, onComplete, onError) {
     const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
     // const decoder = new TextDecoder()
     let offset = 0
@@ -30,7 +30,7 @@ export default {
       seek()
     }
     fileReader.onerror = function () {
-      onComplete(fileReader.error)
+      onError(fileReader.error)
     }
     seek()
 
@@ -46,7 +46,7 @@ export default {
           forEachLine(results) // This is from lines.pop(), before.
           onComplete() // Done
         } else {
-          console.error('Definition file does not match data columns')
+          onError('[Mismatch Error] Definition file does not match data columns')
         }
         return
       }

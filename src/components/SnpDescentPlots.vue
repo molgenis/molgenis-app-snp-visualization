@@ -14,7 +14,8 @@
           </div>
           <div class="form-group">
             <label for="selectChromosome">Chromosome</label>
-            <select class="form-control" id="selectChromosome" v-model="selectedChromosome" @change="onChromosomeSelectChanged">
+            <select class="form-control" id="selectChromosome" v-model="selectedChromosome"
+                    @change="onChromosomeSelectChanged">
               <option>1</option>
               <option>2</option>
               <option>3</option>
@@ -46,14 +47,19 @@
     </div>
     <div class="row">
       <div id="buttons" class="col-md-3">
-        <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked" :disabled="disableProcess">Process data</button>
-        <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad" v-bind:class="{ disabled: !isReadyToDownLoad }">
+        <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked"
+                :disabled="disableProcess">Process data
+        </button>
+        <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad"
+           v-bind:class="{ disabled: !isReadyToDownLoad }">
           <i class="fa fa-download" aria-hidden="true"></i>
         </a>
       </div>
       <div id="status" class="col-md-6 text-center">
-        <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert"><small><i><span v-model="status"> {{status}} </span></i></small><i
-          class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></div>
+        <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert">
+          <small><i><span v-model="status"> {{status}} </span></i></small>
+          <i
+            class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></div>
       </div>
       <div class="col-md-3">
       </div>
@@ -143,7 +149,7 @@
         this.status = 'Processing data'
         this.t0 = performance.now()
         const maxLines = 10000000
-        lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
+        lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete, this.handleError)
       },
       clear () {
         plotter.clear()
@@ -156,8 +162,13 @@
       isSelectedChromosome (columns) {
         return columns[1] === this.selectedChromosome
       },
-      handleMismatchError () {
-        this.status = 'Error! Does your data file match the definition file?'
+      handleError (error) {
+        console.error(error)
+        if (error.startsWith('[Mismatch Error]')) {
+          this.status = 'Error! Does your data file match the definition file?'
+        } else {
+          this.status = 'Error! Something went wrong while parsing your file.'
+        }
         this.isLoading = false
         this.alertClass = 'alert alert-danger'
       },
@@ -182,7 +193,6 @@
           for (let combination in dataIndex) {
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
               isFileCorrect = false
-              this.handleMismatchError()
             } else {
               this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
             }
@@ -207,6 +217,7 @@
           link.href = document.getElementById('plot-canvas').toDataURL()
           link.download = fileName
         }
+
         document.getElementById('download-btn').addEventListener('click', function () {
           downloadCanvas(this)
         }, false)
