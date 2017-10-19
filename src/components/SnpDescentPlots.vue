@@ -42,23 +42,21 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked" :disabled="disableProcess">Process data</button>
-          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadBtnClicked" :disabled="!isReadyToDownLoad">
+          <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad" v-bind:class="{ disabled: !isReadyToDownLoad }">
             <i class="fa fa-download" aria-hidden="true"></i>
-          </button>
-          <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i
+          </a>
+          <span id="statusUpdate"><small><i><span v-model="status"> {{status}} </span></i></small><i
             class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
         </form>
       </div>
     </div>
+
     <div class="row">
-      <div class="col">
-        <div id="plot" class="plots-container" v-show="isDisplayPlots">
-         <svg>
-          <chromosome :figureWidth="plotSizes.width * 0.9" :selected="selectedChromosome"></chromosome>
-         </svg>
-        </div>
+      <div id="canvas-container" class="col">
+        <canvas id="plot-canvas"></canvas>
       </div>
     </div>
+
   </div>
 </template>
 <style>
@@ -72,8 +70,6 @@
 </style>
 <script>
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
-  import Chromosome from './Chromosome'
-  import { saveSvgAsPng } from 'save-svg-as-png'
   import lineReader from '../service/lineReader'
   import identityByDecent from '../service/identityByDecent'
   import plotter from '../service/plotter'
@@ -91,17 +87,25 @@
         hasDefFile: false,
         t0: undefined,
         t1: undefined,
-        selectedChromosome: '1',
-        plotSizes: {
-          height: 300,
-          width: 1000,
-          bottomMargin: 30,
-          titleOffset: 25
-        }
+        selectedChromosome: '1'
       }
     },
-    components: {Chromosome},
     created: function () {
+      this.plotSizes = {
+        height: 250,
+        width: 1075,
+        marginLeft: 25,
+        marginRight: 25,
+        marginBottom: 30,
+        marginTop: 40,
+        paddingLeft: 50,
+        paddingRight: 50,
+        bandWidth: 20,
+        bandDistance: 50,
+        titleOffset: 25,
+        chromosomeBarHeight: 25,
+        chromosomeBarRadius: 12
+      }
       this.results = {}
     },
     methods: {
@@ -126,6 +130,7 @@
         this.dataFile = event.target.files[0]
       },
       onChromosomeSelectChanged () {
+        plotter.clear()
         this.isDisplayPlots = false
         this.isReadyToDownLoad = false
         this.isLoading = false
@@ -139,12 +144,6 @@
         this.t0 = performance.now()
         const maxLines = 1000000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
-      },
-      onDownloadBtnClicked () {
-        const svgElements = document.querySelectorAll('div>.plots-container>svg')
-        const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
-        const name = `${timestamp}.png`
-        saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
       clear () {
         plotter.clear()
@@ -182,17 +181,32 @@
       onComplete () {
         this.t1 = performance.now()
         this.status = 'Plotting ' // ${combination}...`
-        plotter.plotIdentityByDecent(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome)
+        const plotFunction = plotter.plotIdentityByDecent
+        plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
+      },
+      setDownLoadClickHandler () {
+        function downloadCanvas (link) {
+          const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
+          const fileName = `${timestamp}.png`
+          link.href = document.getElementById('plot-canvas').toDataURL()
+          link.download = fileName
+        }
+        document.getElementById('download-btn').addEventListener('click', function () {
+          downloadCanvas(this)
+        }, false)
       }
     },
     computed: {
       disableProcess: function () {
         return !(this.dataFile && this.hasDefFile)
       }
+    },
+    mounted: function () {
+      this.setDownLoadClickHandler()
     }
   }
 </script>
