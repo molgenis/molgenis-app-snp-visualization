@@ -176,16 +176,25 @@ function roundRect (context, x, y, width, height, radius, evenOrOdd) {
   context.stroke()
 }
 
-function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, y, x, bandLabel) {
-  console.log(`y: ${y}, x: ${x}, bandLabel: ${bandLabel}, evenOrOdd: ${evenOrOdd}`)
+function addChromosomeBandLabel (context, bandLabel, x, y) {
+  context.fillText(bandLabel, x, y)
+}
+
+function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, labelYPosition, x, bandLabel) {
+  console.log(`labelYposition: ${labelYPosition}, x: ${x}, bandLabel: ${bandLabel}, evenOrOdd: ${evenOrOdd}`)
   context.strokeRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   if (evenOrOdd === 'odd') {
     console.log('fill rect')
     context.fillRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   }
+  addChromosomeBandLabel(context, bandLabel, x, labelYPosition)
 }
-const getLabelPos = (value) => value % 2 === 0 ? value % 4 === 0 ? 7 : 17 : value % 4 === 1 ? 55 : 65
 
+// Position of band-labels based on %2 and %4
+// even -> below the chromosome, %4 == 0 low, else high; odd -> above the chromosome , %4 == 1 low, else high
+const getLabelPosition = (value, margin) => value % 2 === 0 ? value % 4 === 0 ? margin * 2.1 - 60 : margin * 2.1 - 50 : value % 4 === 1 ? margin * 2.1 - 10 : margin * 2.1
+
+// Color of chromosome bands in the canvas is based on even (white) or odd index (black)
 const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
 
 function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
@@ -202,7 +211,7 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
     let bandWidth = (band[1] - band[0]) * plotSizes.xScale
     const bandLabel = band[2]
     const evenOrOdd = isEvenOrOdd(i)
-    const labelPos = getLabelPos(i)
+    const labelPosition = getLabelPosition(i, plotSizes.marginTop)
     if (i === 0 || band[0] === centerPosition) {
       // Draw left round rect
       // drawChromText(chromosomeContainer, fontsize, band[2], id, 10, 0)
@@ -211,7 +220,7 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
       // Draw right round rect
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius, evenOrOdd)
     } else {
-      drawChromosomeBand(context, plotSizes, bandWidth, evenOrOdd, labelPos, startX, bandLabel)
+      drawChromosomeBand(context, plotSizes, bandWidth, evenOrOdd, labelPosition, startX, bandLabel)
     }
   })
 }
@@ -226,7 +235,7 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   canvas.width = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
   canvas.height = ((plotSizes.height + plotSizes.marginBottom) * numberOfCombinations) + 120
   const context = canvas.getContext('2d')
-  let yOffset = 70
+  let yOffset = 100
 
   plotChromosome(plotSizes, selectedChromosome, context, yOffset)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
@@ -244,5 +253,5 @@ export default {
   calculateXScaleCoefficient,
   buildTimeStamp,
   isEvenOrOdd,
-  getLabelPos
+  getLabelPosition
 }

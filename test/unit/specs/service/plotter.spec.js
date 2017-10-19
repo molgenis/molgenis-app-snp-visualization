@@ -24,17 +24,17 @@ describe('plotter', () => {
   })
 
   describe('getLabelPos', () => {
-    it('should return 7 for even value with modulo 4 equal to 0', () => {
-      expect(plotter.getLabelPos(0)).to.equal(7)
+    it('should return 40 * 2.1 - 60 = 24 for even value with %4 equal to 0', () => {
+      expect(plotter.getLabelPosition(0, 40)).to.equal(24)
     })
-    it('should return 17 for even value with modulo 4 not equal to 0', () => {
-      expect(plotter.getLabelPos(2)).to.equal(17)
+    it('should return 40 * 2.1 - 50 = 34 for even value with %4 not equal to 0', () => {
+      expect(plotter.getLabelPosition(2, 40)).to.equal(34)
     })
-    it('should return 55 for odd value with modulo 4 equal to 1', () => {
-      expect(plotter.getLabelPos(1)).to.equal(55)
+    it('should return 40 * 2.1 - 10 = 74 for odd value with %4 equal to 1', () => {
+      expect(plotter.getLabelPosition(1, 40)).to.equal(74)
     })
-    it('should return 65 for odd value with modulo 4 not equal to 1', () => {
-      expect(plotter.getLabelPos(3)).to.equal(65)
+    it('should return 40 * 2.1      = 84 for odd value with %4 not equal to 1', () => {
+      expect(plotter.getLabelPosition(3, 40)).to.equal(84)
     })
   })
 })

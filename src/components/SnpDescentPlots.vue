@@ -100,7 +100,7 @@
         marginLeft: 25,
         marginRight: 25,
         marginBottom: 30,
-        marginTop: 30,
+        marginTop: 40,
         paddingLeft: 50,
         paddingRight: 50,
         bandWidth: 20,
