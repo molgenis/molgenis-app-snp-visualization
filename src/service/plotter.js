@@ -128,6 +128,10 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   context.fillText(counts['-1'], rightTickLabelX, ncScoreY)
 }
 
+function addPlotFooter (context, footer, x, y) {
+  context.fillText(footer, x, y)
+}
+
 function calculateXScaleCoefficient (width, paddingLeft, paddingRight, maxPosition) {
   return (width - paddingLeft - paddingRight) / maxPosition
 }
@@ -218,6 +222,10 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
   })
 }
 
+const calculateCanvasWidth = (plotSizes) => plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
+
+const calculateCanvasHeight = (plotSizes, yOffset, numberOfCombinations) => yOffset + (plotSizes.height + plotSizes.marginBottom) * numberOfCombinations
+
 function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   plotSizes.xScale = calculateXScaleCoefficient(plotSizes.width, plotSizes.paddingLeft, plotSizes.paddingRight, maxPositionMap[selectedChromosome])
   const numberOfCombinations = Object.keys(dataIndex).length
@@ -225,16 +233,17 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   plotSizes.plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
   plotSizes.plotXEnd = plotSizes.plotXStart + (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight)
   const canvas = document.getElementById('plot-canvas')
-  canvas.width = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
-  canvas.height = ((plotSizes.height + plotSizes.marginBottom) * numberOfCombinations) + 120
+  let yOffset = 120
+  const canvasWidth = calculateCanvasWidth(plotSizes)
+  const canvasHeight = calculateCanvasHeight(plotSizes, yOffset, numberOfCombinations)
+  canvas.height = canvasHeight
+  canvas.width = canvasWidth
   const context = canvas.getContext('2d')
-  let yOffset = 100
-
-  const canvasWidth = plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
-  const canvasHeight = yOffset + (plotSizes.height + plotSizes.marginBottom) * 4
+  console.log(canvas.width, canvasWidth)
   drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
   plotChromosome(plotSizes, selectedChromosome, context, yOffset)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
+  addPlotFooter(context, 'Powered by Molgenis', plotSizes.paddingLeft, canvasHeight - plotSizes.marginBottom + 10)
 }
 
 function clear () {
@@ -249,5 +258,7 @@ export default {
   calculateXScaleCoefficient,
   buildTimeStamp,
   isEvenOrOdd,
-  getLabelPosition
+  getLabelPosition,
+  calculateCanvasWidth,
+  calculateCanvasHeight
 }

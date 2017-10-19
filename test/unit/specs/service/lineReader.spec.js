@@ -18,8 +18,9 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
       const maxLines = 3
       let linesRead = []
       let onCompleteCalled = false
-      const forEachLine = function (line) {
+      const forEachLine = function (line, fileOk) {
         linesRead.push(line)
+        return fileOk
       }
       const onComplete = function () {
         onCompleteCalled = true

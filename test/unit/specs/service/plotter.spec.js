@@ -22,7 +22,6 @@ describe('plotter', () => {
       expect(plotter.isEvenOrOdd(2)).to.equal('even')
     })
   })
-
   describe('getLabelPos', () => {
     it('should return 40 * 2.1 - 60 = 24 for even value with %4 equal to 0', () => {
       expect(plotter.getLabelPosition(0, 40)).to.equal(24)
@@ -35,6 +34,27 @@ describe('plotter', () => {
     })
     it('should return 40 * 2.1      = 84 for odd  value with %4 not equal to 1', () => {
       expect(plotter.getLabelPosition(3, 40)).to.equal(84)
+    })
+  })
+  describe('calculateCanvasWidth', () => {
+    const plotSizes = {
+      width: 1000,
+      marginLeft: 25,
+      marginRight: 25
+    }
+    it('should return the canvas width', () => {
+      expect(plotter.calculateCanvasWidth(plotSizes)).to.equal(1050)
+    })
+  })
+  describe('calculateCanvasHeight', () => {
+    const plotSizes = {
+      height: 200,
+      marginBottom: 50
+    }
+    it('should return the canvas height', () => {
+      const yOffset = 100
+      const numberOfCombinations = 4
+      expect(plotter.calculateCanvasHeight(plotSizes, yOffset, numberOfCombinations)).to.equal(1100)
     })
   })
 })
