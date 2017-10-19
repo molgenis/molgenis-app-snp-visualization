@@ -163,18 +163,19 @@
         return columns[1] === this.selectedChromosome
       },
       handleError (error) {
-        console.error(error)
-        if (error.startsWith('[Mismatch Error]')) {
+        if (error.startsWith('[Invalid data]')) {
+          console.error('[Mismatch Error] Definition file does not match data columns')
           this.status = 'Error! Does your data file match the definition file?'
         } else {
+          console.error('[File read Error] Something went wrong reading the file')
           this.status = 'Error! Something went wrong while parsing your file.'
         }
         this.isLoading = false
         this.alertClass = 'alert alert-danger'
       },
-      forEachLine (line, isFileCorrect) {
+      forEachLine (line, continueReading) {
         const columns = line.split('\t')
-        if (this.isSelectedChromosome(columns) && isFileCorrect) {
+        if (this.isSelectedChromosome(columns) && continueReading) {
           const combinationLabels = Object.keys(this.$store.state.dataIndex)
           for (let combination of combinationLabels) {
             const index1 = this.$store.state.dataIndex[combination].gPos1
@@ -192,13 +193,13 @@
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           for (let combination in dataIndex) {
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
-              isFileCorrect = false
+              continueReading = false
             } else {
               this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
             }
           }
         }
-        return isFileCorrect
+        return continueReading
       },
       onComplete () {
         this.t1 = performance.now()

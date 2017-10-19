@@ -6,9 +6,4 @@ describe('SnpDescentPlots', () => {
       expect(SnpDescentPlots.name).to.equal('snp-descent-plot')
     })
   })
-  describe('forEachLine', () => {
-    it('should', () => {
-      SnpDescentPlots.forEachLine('unicorns\tare\tawesome', true)
-    })
-  })
 })

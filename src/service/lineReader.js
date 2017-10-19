@@ -6,7 +6,7 @@ export default {
     let offset = 0
     let lineCount = 0
     let results = ''
-    let fileSuccess = true
+    let continueReading = true
     const fileReader = new FileReader()
     fileReader.onload = function () {
       results = fileReader.result
@@ -21,10 +21,10 @@ export default {
       }
 
       for (let i = 0; i < lines.length; ++i) {
-        if (!fileSuccess) {
+        if (!continueReading) {
           break
         }
-        fileSuccess = forEachLine(lines[i] + '\n', fileSuccess)
+        continueReading = forEachLine(lines[i] + '\n', continueReading)
       }
       offset += CHUNK_SIZE
       seek()
@@ -42,11 +42,11 @@ export default {
       }
       if (offset !== 0 && offset >= file.size) {
         // We did not find all lines, but there are no more lines.
-        if (fileSuccess) {
+        if (continueReading) {
           forEachLine(results) // This is from lines.pop(), before.
           onComplete() // Done
         } else {
-          onError('[Mismatch Error] Definition file does not match data columns')
+          onError('[Invalid data] the data of the file is not valid')
         }
         return
       }

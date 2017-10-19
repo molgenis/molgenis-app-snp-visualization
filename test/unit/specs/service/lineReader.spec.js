@@ -22,6 +22,9 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
         linesRead.push(line)
         return fileOk
       }
+      const onError = function (error) {
+        return error
+      }
       const onComplete = function () {
         onCompleteCalled = true
         expect(linesRead.length).to.equal(3)
@@ -31,7 +34,25 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
         expect(onCompleteCalled).to.equal(true)
         done()
       }
-      lineReader.readSomeLines(file, maxLines, forEachLine, onComplete)
+      lineReader.readSomeLines(file, maxLines, forEachLine, onComplete, onError())
+    })
+    it('should return error message when file is not correct', (done) => {
+      const multiLineFileData = `test`
+      const file = createFile(multiLineFileData)
+      const maxLines = 3
+      let linesRead = []
+      const forEachLine = function (line, fileOk) {
+        linesRead.push(line)
+        return !fileOk
+      }
+      const onError = function (error) {
+        expect(error.to.equal('[Invalid data] the data of the file is not valid'))
+        done()
+      }
+      const onComplete = function () {
+        done()
+      }
+      lineReader.readSomeLines(file, maxLines, forEachLine, onComplete, onError)
     })
   })
 })
