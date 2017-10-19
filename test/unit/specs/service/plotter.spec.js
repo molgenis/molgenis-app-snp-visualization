@@ -30,10 +30,10 @@ describe('plotter', () => {
     it('should return 40 * 2.1 - 50 = 34 for even value with %4 not equal to 0', () => {
       expect(plotter.getLabelPosition(2, 40)).to.equal(34)
     })
-    it('should return 40 * 2.1 - 10 = 74 for odd value with %4 equal to 1', () => {
+    it('should return 40 * 2.1 - 10 = 74 for odd  value with %4 equal to 1', () => {
       expect(plotter.getLabelPosition(1, 40)).to.equal(74)
     })
-    it('should return 40 * 2.1      = 84 for odd value with %4 not equal to 1', () => {
+    it('should return 40 * 2.1      = 84 for odd  value with %4 not equal to 1', () => {
       expect(plotter.getLabelPosition(3, 40)).to.equal(84)
     })
   })

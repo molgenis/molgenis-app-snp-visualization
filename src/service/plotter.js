@@ -43,13 +43,6 @@ function buildTimeStamp () {
     minutes
 }
 
-// function drawCircle (context, x, y) {
-//   // context.beginPath()
-//   context.arc(x, y, 2, 0, arc, false)
-//   // context.stroke()
-//   // context.closePath()
-// }
-
 function drawPoint (context, x, y) {
   context.fillRect(x, y, 2, 2) // point as 2 by 2 cube
 }
@@ -60,7 +53,6 @@ function drawBackgroud (context, x, y, width, height) {
 }
 
 function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
-  console.log(`plotId: ${plotId}, data, yOffset: ${yOffset}, plotSizes: ${plotSizes}, plotTitle:  ${plotTitle}`)
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
   const tickLabelOffset = 5
   const axisWidth = 1
@@ -91,11 +83,9 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   for (let i = points.length - 1; i >= 0; i--) {
     const position = points[i][0]
     const score = points[i][1] + 1 // plus one to normalize [-1, 2] to [0, 3]
-    // console.log(`position: ${position}, score: ${score}`)
     const jitter = (Math.random() - 0.5) * plotSizes.bandWidth
     const x = plotSizes.plotXStart + Math.floor(position * plotSizes.xScale)
     const y = Math.floor(invertedYCorrection - (0.5 * plotSizes.bandWidth) - ((score) * plotSizes.bandDistance) + jitter)
-    // console.log(`x: ${x}, y: ${y}`)
     drawPoint(context, x, y)
   }
 
@@ -205,9 +195,6 @@ const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
 function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
   const chromosomeData = chromosomePositions.getChromosomeData(selectedChromosome)
   const centerPosition = chromosomePositions.chromosomeCentromere(selectedChromosome)
-  const pArmWidth = centerPosition * plotSizes.xScale
-  console.log(`bar x: ${plotSizes.plotXStart}, y: ${plotSizes.marginTop}, width: ${pArmWidth}, height: ${plotSizes.chromosomeBarHeight}`)
-  // context.strokeRect(plotSizes.plotXStart, plotSizes.marginTop, pArmWidth, plotSizes.chromosomeBarHeight)
   const leftRadius = {tl: plotSizes.chromosomeBarRadius, bl: plotSizes.chromosomeBarRadius}
   const rightRadius = {tr: plotSizes.chromosomeBarRadius, br: plotSizes.chromosomeBarRadius}
 
