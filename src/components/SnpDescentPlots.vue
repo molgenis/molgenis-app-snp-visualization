@@ -42,10 +42,10 @@
             </select>
           </div>
           <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked" :disabled="disableProcess">Process data</button>
-          <button type="button" class="btn btn-primary" id="downloadPlot" @click="onDownloadBtnClicked" :disabled="!isReadyToDownLoad">
+          <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad" v-bind:class="{ disabled: !isReadyToDownLoad }">
             <i class="fa fa-download" aria-hidden="true"></i>
-          </button>
-          <span id="statusUpdate"><small><i><span v-model="status">{{status}}</span></i></small><i
+          </a>
+          <span id="statusUpdate"><small><i><span v-model="status"> {{status}} </span></i></small><i
             class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
         </form>
       </div>
@@ -70,8 +70,6 @@
 </style>
 <script>
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
-  import Chromosome from './Chromosome'
-  import { saveSvgAsPng } from 'save-svg-as-png'
   import lineReader from '../service/lineReader'
   import identityByDecent from '../service/identityByDecent'
   import plotter from '../service/plotter'
@@ -92,7 +90,6 @@
         selectedChromosome: '1'
       }
     },
-    components: {Chromosome},
     created: function () {
       this.plotSizes = {
         height: 250,
@@ -145,14 +142,8 @@
         this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
-        const maxLines = 1000
+        const maxLines = 1000000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
-      },
-      onDownloadBtnClicked () {
-        const svgElements = document.querySelectorAll('div>.plots-container>svg')
-        const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
-        const name = `${timestamp}.png`
-        saveSvgAsPng(svgElements[0], name, {backgroundColor: 'white', width: 1050})
       },
       clear () {
         plotter.clear()
@@ -196,12 +187,26 @@
         this.isLoading = false
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
+      },
+      setDownLoadClickHandler () {
+        function downloadCanvas (link) {
+          const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
+          const fileName = `${timestamp}.png`
+          link.href = document.getElementById('plot-canvas').toDataURL()
+          link.download = fileName
+        }
+        document.getElementById('download-btn').addEventListener('click', function () {
+          downloadCanvas(this)
+        }, false)
       }
     },
     computed: {
       disableProcess: function () {
         return !(this.dataFile && this.hasDefFile)
       }
+    },
+    mounted: function () {
+      this.setDownLoadClickHandler()
     }
   }
 </script>
