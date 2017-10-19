@@ -6,6 +6,7 @@ export default {
     let offset = 0
     let lineCount = 0
     let results = ''
+    let fileSuccess = true
     const fileReader = new FileReader()
     fileReader.onload = function () {
       results = fileReader.result
@@ -20,7 +21,10 @@ export default {
       }
 
       for (let i = 0; i < lines.length; ++i) {
-        forEachLine(lines[i] + '\n')
+        if (!fileSuccess) {
+          break
+        }
+        fileSuccess = forEachLine(lines[i] + '\n', fileSuccess)
       }
       offset += CHUNK_SIZE
       seek()
@@ -38,8 +42,12 @@ export default {
       }
       if (offset !== 0 && offset >= file.size) {
         // We did not find all lines, but there are no more lines.
-        forEachLine(results) // This is from lines.pop(), before.
-        onComplete() // Done
+        if (fileSuccess) {
+          forEachLine(results) // This is from lines.pop(), before.
+          onComplete() // Done
+        } else {
+          console.error('Definition file does not match data columns')
+        }
         return
       }
       let slice = file.slice(offset, offset + CHUNK_SIZE)

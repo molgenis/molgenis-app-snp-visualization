@@ -159,9 +159,8 @@
         this.isLoading = false
         this.alertClass = 'alert alert-danger'
       },
-      forEachLine (line) {
+      forEachLine (line, fileCorrect) {
         const columns = line.split('\t')
-        let fileCorrect = true
         if (this.isSelectedChromosome(columns) && fileCorrect) {
           const combinationLabels = Object.keys(this.$store.state.dataIndex)
           for (let combination of combinationLabels) {
@@ -187,10 +186,10 @@
             }
           }
         }
+        return fileCorrect
       },
       onComplete () {
         this.t1 = performance.now()
-        this.status = 'Plotting '
         const plotFunction = plotter.plotIdentityByDecent
         plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
         this.results = {}
