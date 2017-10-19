@@ -140,7 +140,7 @@
         this.isDisplayPlots = true
         this.status = 'Processing data'
         this.t0 = performance.now()
-        const maxLines = 1000000
+        const maxLines = 10000000
         lineReader.readSomeLines(this.dataFile, maxLines, this.forEachLine, this.onComplete)
       },
       clear () {
