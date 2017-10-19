@@ -51,9 +51,11 @@
           <i class="fa fa-download" aria-hidden="true"></i>
         </a>
       </div>
-      <div id="status" class="col-md-9">
+      <div id="status" class="col-md-6 text-center">
         <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert"><small><i><span v-model="status"> {{status}} </span></i></small><i
           class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></div>
+      </div>
+      <div class="col-md-3">
       </div>
     </div>
     <div class="row">
