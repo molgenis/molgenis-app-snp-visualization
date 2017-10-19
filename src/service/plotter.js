@@ -206,11 +206,12 @@ function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
     const labelPosition = getLabelPosition(i, plotSizes.marginTop)
     if (i === 0 || band[0] === centerPosition) {
       // Draw left round rect
-      // drawChromText(chromosomeContainer, fontsize, band[2], id, 10, 0)
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, leftRadius, evenOrOdd)
+      addChromosomeBandLabel(context, bandLabel, startX, labelPosition)
     } else if (i === chromosomeData.length - 1 || band[1] === centerPosition) {
       // Draw right round rect
       roundRect(context, startX, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight, rightRadius, evenOrOdd)
+      addChromosomeBandLabel(context, bandLabel, startX, labelPosition)
     } else {
       drawChromosomeBand(context, plotSizes, bandWidth, evenOrOdd, labelPosition, startX, bandLabel)
     }
