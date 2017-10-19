@@ -18,9 +18,9 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
       const maxLines = 3
       let linesRead = []
       let onCompleteCalled = false
-      const forEachLine = function (line, fileOk) {
+      const forEachLine = function (line, isFileOk) {
         linesRead.push(line)
-        return fileOk
+        return isFileOk
       }
       const onError = function (error) {
         return error
@@ -41,9 +41,9 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
       const file = createFile(multiLineFileData)
       const maxLines = 3
       let linesRead = []
-      const forEachLine = function (line, fileOk) {
+      const forEachLine = function (line, isFileOk) {
         linesRead.push(line)
-        return !fileOk
+        return !isFileOk
       }
       const onError = function (error) {
         expect(error.to.equal('[Invalid data] the data of the file is not valid'))
