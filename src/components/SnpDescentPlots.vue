@@ -41,16 +41,21 @@
               <option>Y</option>
             </select>
           </div>
-          <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked" :disabled="disableProcess">Process data</button>
-          <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad" v-bind:class="{ disabled: !isReadyToDownLoad }">
-            <i class="fa fa-download" aria-hidden="true"></i>
-          </a>
-          <span id="statusUpdate"><small><i><span v-model="status"> {{status}} </span></i></small><i
-            class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></span>
         </form>
       </div>
     </div>
-
+    <div class="row">
+      <div id="buttons" class="col-md-3">
+        <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked" :disabled="disableProcess">Process data</button>
+        <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad" v-bind:class="{ disabled: !isReadyToDownLoad }">
+          <i class="fa fa-download" aria-hidden="true"></i>
+        </a>
+      </div>
+      <div id="status" class="col-md-9">
+        <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert"><small><i><span v-model="status"> {{status}} </span></i></small><i
+          class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></div>
+      </div>
+    </div>
     <div class="row">
       <div id="canvas-container" class="col">
         <canvas id="plot-canvas"></canvas>
@@ -59,15 +64,6 @@
 
   </div>
 </template>
-<style>
-  .plots-container {
-    margin: 1rem 0;
-  }
-
-  #statusUpdate {
-    color: grey;
-  }
-</style>
 <script>
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import lineReader from '../service/lineReader'
@@ -87,7 +83,8 @@
         hasDefFile: false,
         t0: undefined,
         t1: undefined,
-        selectedChromosome: '1'
+        selectedChromosome: '1',
+        alertClass: 'alert alert-primary'
       }
     },
     created: function () {
@@ -135,6 +132,7 @@
         this.isReadyToDownLoad = false
         this.isLoading = false
         this.status = ''
+        this.alertClass = 'alert alert-primary'
       },
       onProcessBtnClicked () {
         this.clear()
@@ -151,13 +149,20 @@
         this.isReadyToDownLoad = false
         this.isLoading = false
         this.status = ''
+        this.alertClass = 'alert alert-primary'
       },
       isSelectedChromosome (columns) {
         return columns[1] === this.selectedChromosome
       },
+      handleMismatchError () {
+        this.status = 'Error! Does your data file match the definition file?'
+        this.isLoading = false
+        this.alertClass = 'alert alert-danger'
+      },
       forEachLine (line) {
         const columns = line.split('\t')
-        if (this.isSelectedChromosome(columns)) {
+        let fileCorrect = true
+        if (this.isSelectedChromosome(columns) && fileCorrect) {
           const combinationLabels = Object.keys(this.$store.state.dataIndex)
           for (let combination of combinationLabels) {
             const index1 = this.$store.state.dataIndex[combination].gPos1
@@ -174,19 +179,25 @@
           const dataIndex = dataDefinition.buildDataIndex(parsedDefData, columns)
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           for (let combination in dataIndex) {
-            this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
+            if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
+              fileCorrect = false
+              this.handleMismatchError()
+            } else {
+              this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
+            }
           }
         }
       },
       onComplete () {
         this.t1 = performance.now()
-        this.status = 'Plotting ' // ${combination}...`
+        this.status = 'Plotting '
         const plotFunction = plotter.plotIdentityByDecent
         plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
         this.status = `Completed in ${Math.round((this.t1 - this.t0) / 1000)} seconds`
+        this.alertClass = 'alert alert-success'
       },
       setDownLoadClickHandler () {
         function downloadCanvas (link) {
