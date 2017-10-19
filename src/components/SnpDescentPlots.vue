@@ -159,9 +159,9 @@
         this.isLoading = false
         this.alertClass = 'alert alert-danger'
       },
-      forEachLine (line, fileCorrect) {
+      forEachLine (line, isFileCorrect) {
         const columns = line.split('\t')
-        if (this.isSelectedChromosome(columns) && fileCorrect) {
+        if (this.isSelectedChromosome(columns) && isFileCorrect) {
           const combinationLabels = Object.keys(this.$store.state.dataIndex)
           for (let combination of combinationLabels) {
             const index1 = this.$store.state.dataIndex[combination].gPos1
@@ -179,14 +179,14 @@
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           for (let combination in dataIndex) {
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
-              fileCorrect = false
+              isFileCorrect = false
               this.handleMismatchError()
             } else {
               this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
             }
           }
         }
-        return fileCorrect
+        return isFileCorrect
       },
       onComplete () {
         this.t1 = performance.now()
