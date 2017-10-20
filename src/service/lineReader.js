@@ -1,15 +1,6 @@
 export default {
-  /**
-   *
-   * @param file
-   * @param maxLines
-   * @param forEachLine
-   * @param onComplete
-   * @param onError
-   */
   readSomeLines (file, maxLines, forEachLine, onComplete, onError) {
     const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
-    // const decoder = new TextDecoder()
     let offset = 0
     let lineCount = 0
     let results = ''
