@@ -52,7 +52,7 @@ function drawBackgroud (context, x, y, width, height) {
   context.fillRect(x, y, width, height)
 }
 
-function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
+function canvasPlot (points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
   const tickLabelOffset = 5
   const axisWidth = 1
@@ -143,11 +143,12 @@ function calculateXScaleCoefficient (width, paddingLeft, paddingRight, maxPositi
 }
 
 function plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset) {
-  for (let plotId in dataIndex) {
+  const dataIndexKeys = Object.keys(dataIndex)
+  for (let plotId of dataIndexKeys) {
     const geneColumnNr1 = dataIndex[plotId].gPosColumnNr1
     const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
     const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
-    canvasPlot(plotId, data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
+    canvasPlot(data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
     yOffset += plotSizes.height + plotSizes.marginBottom
   }
 }
@@ -208,7 +209,7 @@ const getLabelPosition = (value, margin) => {
 // Color of chromosome bands in the canvas is based on even (white) or odd index (black)
 const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
 
-function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
+function plotChromosome (plotSizes, selectedChromosome, context) {
   const chromosomeData = chromosomePositions.getChromosomeData(selectedChromosome)
   const centerPosition = chromosomePositions.chromosomeCentromere(selectedChromosome)
   const leftRadius = {tl: plotSizes.chromosomeBarRadius, bl: plotSizes.chromosomeBarRadius}
@@ -252,7 +253,7 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   canvas.width = canvasWidth
   const context = canvas.getContext('2d')
   drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
-  plotChromosome(plotSizes, selectedChromosome, context, yOffset)
+  plotChromosome(plotSizes, selectedChromosome, context)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
   addPlotFooter(context, 'Powered by MOLGENIS', plotSizes.paddingLeft, canvasHeight - plotSizes.marginBottom + 10)
 }
