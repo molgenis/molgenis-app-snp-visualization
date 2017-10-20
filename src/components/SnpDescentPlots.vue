@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="row">
+
       <div class="col">
         <h1>SNP Visualizations</h1>
 
@@ -44,10 +45,12 @@
             </select>
           </div>
         </form>
+
       </div>
     </div>
 
     <div class="row">
+
       <div id="buttons" class="col-md-4">
         <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked"
                 :disabled="disableProcess">Process data
@@ -65,7 +68,6 @@
           <i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i>
         </div>
       </div>
-      <div class="col-md-4"></div>
     </div>
 
     <div class="row">
@@ -73,6 +75,7 @@
         <canvas id="plot-canvas"></canvas>
       </div>
     </div>
+
   </div>
 </template>
 
