@@ -96,13 +96,16 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   const axisLength = 3 * plotSizes.bandDistance + plotSizes.bandWidth
   const leftAxisYStart = invertedYCorrection - axisLength
   const leftTickLabelX = plotSizes.plotXStart - tickLabelOffset
+
   // draw left axis
   context.fillRect(plotSizes.plotXStart, leftAxisYStart, axisWidth, axisLength)
+
   // draw ticks
   context.fillRect(leftTickLabelX, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, ncScoreY, tickLabelOffset, axisWidth)
+
   // draw tick labels
   context.fillText('2', leftTickLabelX, twoScoreY)
   context.fillText('1', leftTickLabelX, oneScoreY)
@@ -114,13 +117,16 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   context.textBaseline = 'middle'
   context.textAlign = 'start'
   const rightTickLabelX = plotSizes.plotXEnd + tickLabelOffset
+
   // draw right axis
   context.fillRect(plotSizes.plotXEnd, leftAxisYStart, axisWidth, axisLength)
+
   // draw ticks
   context.fillRect(plotSizes.plotXEnd, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotSizes.plotXEnd, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotSizes.plotXEnd, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotSizes.plotXEnd, ncScoreY, tickLabelOffset, axisWidth)
+
   // draw tick labels
   context.fillText(counts['2'], rightTickLabelX, twoScoreY)
   context.fillText(counts['1'], rightTickLabelX, oneScoreY)
@@ -243,7 +249,7 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
   plotChromosome(plotSizes, selectedChromosome, context, yOffset)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
-  addPlotFooter(context, 'Powered by Molgenis', plotSizes.paddingLeft, canvasHeight - plotSizes.marginBottom + 10)
+  addPlotFooter(context, 'Powered by MOLGENIS', plotSizes.paddingLeft, canvasHeight - plotSizes.marginBottom + 10)
 }
 
 function clear () {

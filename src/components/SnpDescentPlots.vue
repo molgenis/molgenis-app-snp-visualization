@@ -3,6 +3,7 @@
     <div class="row">
       <div class="col">
         <h1>SNP Visualizations</h1>
+
         <form>
           <div class="form-group">
             <label for="devFileInput">Definition file</label>
@@ -45,16 +46,19 @@
         </form>
       </div>
     </div>
+
     <div class="row">
       <div id="buttons" class="col-md-4">
         <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked"
                 :disabled="disableProcess">Process data
         </button>
+
         <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad"
            v-bind:class="{ disabled: !isReadyToDownLoad }">
           <i class="fa fa-download" aria-hidden="true"></i>
         </a>
       </div>
+
       <div id="status" class="col-md-4 text-center">
         <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert">
           <small><i><span v-model="status"> {{status}} </span></i></small>
@@ -63,14 +67,15 @@
       </div>
       <div class="col-md-4"></div>
     </div>
+
     <div class="row">
       <div id="canvas-container" class="col">
         <canvas id="plot-canvas"></canvas>
       </div>
     </div>
-
   </div>
 </template>
+
 <script>
   import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
   import lineReader from '../service/lineReader'
@@ -214,6 +219,7 @@
       setDownLoadClickHandler () {
         const currentBrowser = browser()
         const isInternetExplorer = currentBrowser.name === 'edge' || currentBrowser.name === 'ie'
+
         function downloadCanvas (link) {
           const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
           const fileName = `${timestamp}.png`
@@ -228,6 +234,7 @@
             window.navigator.msSaveBlob(blob, fileName)
           }
         }
+
         document.getElementById('download-btn').addEventListener('click', function () {
           downloadCanvas(this)
         }, false)

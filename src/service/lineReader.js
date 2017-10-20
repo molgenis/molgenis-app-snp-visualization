@@ -1,5 +1,12 @@
 export default {
-
+  /**
+   *
+   * @param file
+   * @param maxLines
+   * @param forEachLine
+   * @param onComplete
+   * @param onError
+   */
   readSomeLines (file, maxLines, forEachLine, onComplete, onError) {
     const CHUNK_SIZE = 50000 // 50kb, arbitrarily chosen.
     // const decoder = new TextDecoder()
@@ -7,9 +14,11 @@ export default {
     let lineCount = 0
     let results = ''
     let continueReading = true
+
     const fileReader = new FileReader()
     fileReader.onload = function () {
       results = fileReader.result
+
       const lines = results.split('\n')
       results = lines.pop() // In case the line did not end yet.
       lineCount += lines.length
@@ -29,6 +38,7 @@ export default {
       offset += CHUNK_SIZE
       seek()
     }
+
     fileReader.onerror = function () {
       onError(fileReader.error)
     }
@@ -40,6 +50,7 @@ export default {
         onComplete() // Done.
         return
       }
+
       if (offset !== 0 && offset >= file.size) {
         // We did not find all lines, but there are no more lines.
         if (continueReading) {
@@ -54,5 +65,4 @@ export default {
       fileReader.readAsText(slice)
     }
   }
-
 }
