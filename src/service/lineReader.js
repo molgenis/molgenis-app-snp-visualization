@@ -4,7 +4,6 @@ export default {
     let offset = 0
     let lineCount = 0
     let results = ''
-    let continueReading = true
 
     const fileReader = new FileReader()
     fileReader.onload = function () {
@@ -20,11 +19,16 @@ export default {
         lineCount = maxLines
       }
 
+      let isSuccess = true
       for (let i = 0; i < lines.length; ++i) {
-        if (!continueReading) {
+        isSuccess = forEachLine(lines[i] + '\n')
+        if (!isSuccess) {
+          onError('[Invalid data] the data of the file is not valid')
           break
         }
-        continueReading = forEachLine(lines[i] + '\n', continueReading)
+      }
+      if (!isSuccess) {
+        return
       }
       offset += CHUNK_SIZE
       seek()
@@ -44,12 +48,8 @@ export default {
 
       if (offset !== 0 && offset >= file.size) {
         // We did not find all lines, but there are no more lines.
-        if (continueReading) {
-          forEachLine(results) // This is from lines.pop(), before.
-          onComplete() // Done
-        } else {
-          onError('[Invalid data] the data of the file is not valid')
-        }
+        forEachLine(results) // This is from lines.pop(), before.
+        onComplete() // Done
         return
       }
       let slice = file.slice(offset, offset + CHUNK_SIZE)

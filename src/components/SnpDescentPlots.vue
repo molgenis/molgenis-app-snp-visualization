@@ -180,10 +180,20 @@
         }
         this.isLoading = false
         this.alertClass = 'alert alert-danger'
+        plotter.clear()
+        this.isDisplayPlots = false
+        this.isReadyToDownLoad = false
+        this.isLoading = false
       },
-      forEachLine (line, continueReading) {
+      /**
+       * Process a single line from the data file.
+       * Return true in case of successful processing of line to keep on reading.
+       * Return false to indicate error and stop the read of the data file.
+       **/
+      forEachLine (line) {
         const columns = line.split('\t')
-        if (this.isSelectedChromosome(columns) && continueReading) {
+        let isSuccess = true
+        if (this.isSelectedChromosome(columns)) {
           const combinationLabels = Object.keys(this.$store.state.dataIndex)
           for (let combination of combinationLabels) {
             const index1 = this.$store.state.dataIndex[combination].gPos1
@@ -202,13 +212,13 @@
           const combinations = Object.keys(parsedDefData)
           for (let combination of combinations) {
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
-              continueReading = false
+              isSuccess = false
             } else {
               this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
             }
           }
         }
-        return continueReading
+        return isSuccess
       },
       onComplete () {
         this.t1 = performance.now()
