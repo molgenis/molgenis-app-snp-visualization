@@ -46,7 +46,7 @@
       </div>
     </div>
     <div class="row">
-      <div id="buttons" class="col-md-3">
+      <div id="buttons" class="col-md-4">
         <button type="button" class="btn btn-primary" id="processFiles" @click="onProcessBtnClicked"
                 :disabled="disableProcess">Process data
         </button>
@@ -55,14 +55,13 @@
           <i class="fa fa-download" aria-hidden="true"></i>
         </a>
       </div>
-      <div id="status" class="col-md-6 text-center">
+      <div id="status" class="col-md-4 text-center">
         <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert">
           <small><i><span v-model="status"> {{status}} </span></i></small>
-          <i
-            class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i></div>
+          <i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i>
+        </div>
       </div>
-      <div class="col-md-3">
-      </div>
+      <div class="col-md-4"></div>
     </div>
     <div class="row">
       <div id="canvas-container" class="col">
@@ -78,6 +77,7 @@
   import identityByDecent from '../service/identityByDecent'
   import plotter from '../service/plotter'
   import dataDefinition from '../service/dataDefinition'
+  import browser from 'browser-detect'
 
   export default {
     name: 'snp-descent-plot',
@@ -212,13 +212,22 @@
         this.alertClass = 'alert alert-success'
       },
       setDownLoadClickHandler () {
+        const currentBrowser = browser()
+        const isInternetExplorer = currentBrowser.name === 'edge' || currentBrowser.name === 'ie'
         function downloadCanvas (link) {
           const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
           const fileName = `${timestamp}.png`
-          link.href = document.getElementById('plot-canvas').toDataURL()
-          link.download = fileName
+          const canvas = document.getElementById('plot-canvas')
+          if (!isInternetExplorer) {
+            // non ie can use simple and fast method
+            link.href = canvas.toDataURL()
+            link.download = fileName
+          } else {
+            // ie needs to use blob as intermediate
+            let blob = canvas.msToBlob()
+            window.navigator.msSaveBlob(blob, fileName)
+          }
         }
-
         document.getElementById('download-btn').addEventListener('click', function () {
           downloadCanvas(this)
         }, false)
