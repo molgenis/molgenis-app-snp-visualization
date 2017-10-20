@@ -197,7 +197,13 @@ function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, labelYPos
 
 // Position of band-labels based on %2 and %4
 // even -> below the chromosome, %4 == 0 low, else high; odd -> above the chromosome , %4 == 1 low, else high
-const getLabelPosition = (value, margin) => value % 2 === 0 ? value % 4 === 0 ? margin * 2.1 - 60 : margin * 2.1 - 50 : value % 4 === 1 ? margin * 2.1 - 10 : margin * 2.1
+const getLabelPosition = (value, margin) => {
+  if (value % 2 === 0) {
+    return value % 4 === 0 ? margin * 2.1 - 60 : margin * 2.1 - 50
+  } else {
+    return value % 4 === 1 ? margin * 2.1 - 10 : margin * 2.1
+  }
+}
 
 // Color of chromosome bands in the canvas is based on even (white) or odd index (black)
 const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
@@ -245,7 +251,6 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   canvas.height = canvasHeight
   canvas.width = canvasWidth
   const context = canvas.getContext('2d')
-  console.log(canvas.width, canvasWidth)
   drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
   plotChromosome(plotSizes, selectedChromosome, context, yOffset)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
