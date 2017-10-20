@@ -97,8 +97,8 @@
         status: '',
         dataFile: undefined,
         hasDefFile: false,
-        t0: undefined,
-        t1: undefined,
+        t0: 0,
+        t1: 0,
         selectedChromosome: '1',
         alertClass: 'alert alert-primary'
       }
