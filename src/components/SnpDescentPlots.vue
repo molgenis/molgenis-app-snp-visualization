@@ -199,7 +199,8 @@
           const parsedDefData = this.$store.state.parsedDefObj
           const dataIndex = dataDefinition.buildDataIndex(parsedDefData, columns)
           this.$store.commit(SET_DATA_INDEX, dataIndex)
-          for (let combination in dataIndex) {
+          const combinations = Object.keys(parsedDefData)
+          for (let combination of combinations) {
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
               continueReading = false
             } else {
