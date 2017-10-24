@@ -1,4 +1,4 @@
-import lineReader from 'service/lineReader.js'
+import lineReader from 'service/lineReader'
 
 const createFile = function (fileData) {
   let create = [fileData]
@@ -18,13 +18,16 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
       const maxLines = 3
       let linesRead = []
       let onCompleteCalled = false
-      const forEachLine = function (line, isFileOk) {
+
+      const forEachLine = function (line) {
         linesRead.push(line)
-        return isFileOk
+        return true
       }
+
       const onError = function (error) {
         return error
       }
+
       const onComplete = function () {
         onCompleteCalled = true
         expect(linesRead.length).to.equal(3)
@@ -34,23 +37,31 @@ cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
         expect(onCompleteCalled).to.equal(true)
         done()
       }
-      lineReader.readSomeLines(file, maxLines, forEachLine, onComplete, onError())
+      lineReader.readSomeLines(file, maxLines, forEachLine, onComplete, onError)
     })
+
     it('should return error message when file is not correct', (done) => {
-      const multiLineFileData = `test`
+      const multiLineFileData = `Authentic bitters blue bottle hella swag.
+Shaman subway tile meditation, church-key small batch prism sunt paleo.
+Pitchfork banh mi leggings try-hard voluptate 3 wolf moon artisan keytar.
+Eiusmod adipisicing ethical pug single-origin coffee organic semiotics master
+cleanse kinfolk crucifix marfa gochujang elit chicharrones food truck.`
       const file = createFile(multiLineFileData)
       const maxLines = 3
       let linesRead = []
-      const forEachLine = function (line, isFileOk) {
+
+      const forEachLine = function (line) {
         linesRead.push(line)
-        return !isFileOk
+        return false
       }
+
       const onError = function (error) {
-        expect(error.to.equal('[Invalid data] the data of the file is not valid'))
+        expect(error).to.equal('[Invalid data] the data of the file is not valid')
         done()
       }
+
       const onComplete = function () {
-        done()
+        expect(true).to.equal(false, 'This function should never be called')
       }
       lineReader.readSomeLines(file, maxLines, forEachLine, onComplete, onError)
     })
