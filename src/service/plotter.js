@@ -52,7 +52,7 @@ function drawBackgroud (context, x, y, width, height) {
   context.fillRect(x, y, width, height)
 }
 
-function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
+function canvasPlot (points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
   const tickLabelOffset = 5
   const axisWidth = 1
@@ -96,13 +96,16 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   const axisLength = 3 * plotSizes.bandDistance + plotSizes.bandWidth
   const leftAxisYStart = invertedYCorrection - axisLength
   const leftTickLabelX = plotSizes.plotXStart - tickLabelOffset
+
   // draw left axis
   context.fillRect(plotSizes.plotXStart, leftAxisYStart, axisWidth, axisLength)
+
   // draw ticks
   context.fillRect(leftTickLabelX, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(leftTickLabelX, ncScoreY, tickLabelOffset, axisWidth)
+
   // draw tick labels
   context.fillText('2', leftTickLabelX, twoScoreY)
   context.fillText('1', leftTickLabelX, oneScoreY)
@@ -114,13 +117,16 @@ function canvasPlot (plotId, points, counts, yOffset, context, plotSizes, plotTi
   context.textBaseline = 'middle'
   context.textAlign = 'start'
   const rightTickLabelX = plotSizes.plotXEnd + tickLabelOffset
+
   // draw right axis
   context.fillRect(plotSizes.plotXEnd, leftAxisYStart, axisWidth, axisLength)
+
   // draw ticks
   context.fillRect(plotSizes.plotXEnd, twoScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotSizes.plotXEnd, oneScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotSizes.plotXEnd, zeroScoreY, tickLabelOffset, axisWidth)
   context.fillRect(plotSizes.plotXEnd, ncScoreY, tickLabelOffset, axisWidth)
+
   // draw tick labels
   context.fillText(counts['2'], rightTickLabelX, twoScoreY)
   context.fillText(counts['1'], rightTickLabelX, oneScoreY)
@@ -137,11 +143,12 @@ function calculateXScaleCoefficient (width, paddingLeft, paddingRight, maxPositi
 }
 
 function plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset) {
-  for (let plotId in dataIndex) {
+  const dataIndexKeys = Object.keys(dataIndex)
+  for (let plotId of dataIndexKeys) {
     const geneColumnNr1 = dataIndex[plotId].gPosColumnNr1
     const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
     const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
-    canvasPlot(plotId, data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
+    canvasPlot(data[plotId].points, data[plotId].counts, yOffset, context, plotSizes, plotTitle, timeStamp)
     yOffset += plotSizes.height + plotSizes.marginBottom
   }
 }
@@ -191,12 +198,18 @@ function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, labelYPos
 
 // Position of band-labels based on %2 and %4
 // even -> below the chromosome, %4 == 0 low, else high; odd -> above the chromosome , %4 == 1 low, else high
-const getLabelPosition = (value, margin) => value % 2 === 0 ? value % 4 === 0 ? margin * 2.1 - 60 : margin * 2.1 - 50 : value % 4 === 1 ? margin * 2.1 - 10 : margin * 2.1
+const getLabelPosition = (value, margin) => {
+  if (value % 2 === 0) {
+    return value % 4 === 0 ? margin * 2.1 - 60 : margin * 2.1 - 50
+  } else {
+    return value % 4 === 1 ? margin * 2.1 - 10 : margin * 2.1
+  }
+}
 
 // Color of chromosome bands in the canvas is based on even (white) or odd index (black)
 const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
 
-function plotChromosome (plotSizes, selectedChromosome, context, yOffset) {
+function plotChromosome (plotSizes, selectedChromosome, context) {
   const chromosomeData = chromosomePositions.getChromosomeData(selectedChromosome)
   const centerPosition = chromosomePositions.chromosomeCentromere(selectedChromosome)
   const leftRadius = {tl: plotSizes.chromosomeBarRadius, bl: plotSizes.chromosomeBarRadius}
@@ -239,11 +252,10 @@ function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
   canvas.height = canvasHeight
   canvas.width = canvasWidth
   const context = canvas.getContext('2d')
-  console.log(canvas.width, canvasWidth)
   drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
-  plotChromosome(plotSizes, selectedChromosome, context, yOffset)
+  plotChromosome(plotSizes, selectedChromosome, context)
   plotFunction(data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset)
-  addPlotFooter(context, 'Powered by Molgenis', plotSizes.paddingLeft, canvasHeight - plotSizes.marginBottom + 10)
+  addPlotFooter(context, 'Powered by MOLGENIS', plotSizes.paddingLeft, canvasHeight - plotSizes.marginBottom + 10)
 }
 
 function clear () {
