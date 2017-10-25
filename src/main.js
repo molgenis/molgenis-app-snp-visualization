@@ -8,7 +8,6 @@ import router from './router'
 import App from './App'
 
 import 'bootstrap/dist/css/bootstrap.css' // Bootstrap import
-import 'font-awesome/css/font-awesome.min.css' // Font awesome import
 
 if (window.__webpack_public_path__) {
   /* eslint-disable no-undef, camelcase */
