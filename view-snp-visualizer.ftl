@@ -5,6 +5,7 @@
   <title>SNP Visualisations</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- work around for bug in app store, not loading resources -->
   <script src="https://use.fontawesome.com/4b6985a594.js"></script>
 </head>
 <body>
