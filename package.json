@@ -1,8 +1,12 @@
 {
-  "name": "m5128_snp_descent_plots",
+  "name": "snp-visualization",
   "version": "1.0.0",
-  "description": "A MOLGENIS Vue.js project",
-  "author": "mkslofstra <mariska-karina@hotmail.com>",
+  "description": "A Vue project using Canvas to create identity by descent plots",
+  "contributors": [
+    { "name": "Mariska Slofstra", "email": "mariska-karina@hotmail.com" },
+    { "name": "Connor Stroomberg", "email": "c.stroomberg@gmail.com" },
+    { "name": "Mark de Haan", "email": "markdehaan90@gmail.com" }
+  ],
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
