@@ -1,4 +1,4 @@
-# molgenis-app-snp-visualization-v2
+# molgenis-app-snp-visualization
 
 ## Project setup
 ```
