@@ -1,5 +1,5 @@
 export default {
-  computeScore (p1, p2) {
+  computeScore (p1: string, p2: string) {
     if (p1 === p2 || (p1 === 'AB' && p2 === 'BA') || (p1 === 'BA' && p2 === 'AB')) {
       return 2
     }

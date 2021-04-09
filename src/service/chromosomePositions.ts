@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 const chromosomeData = {
   '1': [[0, 2300000, 'p36.33'], [2300000, 5400000, 'p36.32'], [5400000, 7200000, 'p36.31'],
     [7200000, 9200000, 'p36.23'], [9200000, 12700000, 'p36.22'], [12700000, 16200000, 'p36.21'],
@@ -297,9 +299,10 @@ const chromosomeData = {
 }
 
 export default {
-  chromosomeCentromere: function (selectedChromosome) {
+  chromosomeCentromere: (selectedChromosome: string):number | undefined => {
     let prevVal = 'p'
-    for (let value of chromosomeData[selectedChromosome]) {
+    // @ts-ignore
+    for (const value of chromosomeData[selectedChromosome]) {
       if (prevVal.startsWith('p') && value[2].startsWith('q')) {
         return value[0]
       } else {
@@ -307,10 +310,12 @@ export default {
       }
     }
   },
-  chromosomeSize: function (selectedChromosome) {
+  chromosomeSize: function (selectedChromosome: string):number {
+    // @ts-ignore
     return chromosomeData[selectedChromosome].slice(-1)[0][1]
   },
-  getChromosomeData: function (selectedChromosome) {
+  getChromosomeData: function (selectedChromosome: string):[[number, number, string]] {
+    // @ts-ignore
     return chromosomeData[selectedChromosome]
   }
 }

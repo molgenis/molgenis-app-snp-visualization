@@ -1,8 +1,10 @@
+type dataIndex = Record<string, { gPos1: number, gPosColumnNr1: number, gPos2: number, gPosColumnNr2: number }>
+
 export default {
-  buildDataIndex (parsedDefData, columnHeaders) {
+  buildDataIndex (parsedDefData: any, columnHeaders: any): dataIndex {
     const combinations = Object.keys(parsedDefData)
-    let dataIndex = {}
-    for (let combination of combinations) {
+    const dataIndex: dataIndex = {}
+    for (const combination of combinations) {
       const gPosColumnNr1 = parsedDefData[combination][0]
       const gPos1 = columnHeaders.indexOf(gPosColumnNr1 + '.GType')
       const gPosColumnNr2 = parsedDefData[combination][1]
@@ -11,9 +13,9 @@ export default {
     }
     return dataIndex
   },
-  calculatePlotCombinations (defs) {
+  calculatePlotCombinations(defs: Record<string, string>): Record<string, [string, string]> {
     const keys = Object.keys(defs)
-    let results = {}
+    const results: Record<string, [string, string]> = {}
     for (let i = 0; i < keys.length - 1; i++) {
       // This is where you'll capture that last value
       for (let j = i + 1; j < keys.length; j++) {
@@ -22,8 +24,8 @@ export default {
     }
     return results
   },
-  readDefinitionLines (lineData) {
-    let defObj = {}
+  readDefinitionLines(lineData: string): Record<string, string> {
+    const defObj: Record<string, string> = {}
     const lines = lineData.split('\n')
     const columns = lines[0].replace(/\r/g, '').split('\t')
     columns.shift()

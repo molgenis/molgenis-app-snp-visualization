@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "description": "A Vue project using Canvas to create identity by descent plots",
   "contributors": [
-    { "name": "Mariska Slofstra", "email": "mariska-karina@hotmail.com" },
-    { "name": "Connor Stroomberg", "email": "c.stroomberg@gmail.com" },
-    { "name": "Mark de Haan", "email": "markdehaan90@gmail.com" }
+    {
+      "name": "Mariska Slofstra",
+      "email": "mariska-karina@hotmail.com"
+    },
+    {
+      "name": "Connor Stroomberg",
+      "email": "c.stroomberg@gmail.com"
+    },
+    {
+      "name": "Mark de Haan",
+      "email": "markdehaan90@gmail.com"
+    }
   ],
   "private": true,
   "scripts": {
@@ -27,6 +36,7 @@
   },
   "devDependencies": {
     "@types/jest": "^24.0.19",
+    "@types/jquery": "^1.9",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -1,5 +1,26 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import jquery from 'jquery'
 import chromosomePositions from './chromosomePositions'
+type DataIndex = Record<string, { gPos1: number, gPosColumnNr1: number, gPos2: number, gPosColumnNr2: number }>
+type PlotSizes = {
+  height: number,
+  width: number,
+  marginLeft: number,
+  marginRight: number,
+  marginBottom: number,
+  marginTop: number,
+  paddingLeft: number,
+  paddingRight: number,
+  bandWidth: number,
+  bandDistance: number,
+  titleOffset: number,
+  chromosomeBarHeight: number,
+  chromosomeBarRadius: number,
+  plotXStart: number,
+  xScale: number,
+  plotXEnd: number
+}
+
 // const arc = 2 * Math.PI
 
 // Max position per chromosome, used to determine plot domain on x axis, Min position is always 0
@@ -31,28 +52,27 @@ const maxPositionMap = {
 }
 
 function buildTimeStamp () {
-  let currentDate = new Date()
-  let minutes = currentDate.getMinutes()
-  if (minutes < 10) {
-    minutes = '0' + minutes.toString()
-  }
+  const currentDate = new Date()
+  const minutes = currentDate.getMinutes()
+  const minutesString = minutes < 10 ? '0' + minutes.toString() : minutes.toString()
+  
   return currentDate.getDate() + '/' +
     (currentDate.getMonth() + 1) + '/' +
     currentDate.getFullYear() + ' @ ' +
     currentDate.getHours() + ':' +
-    minutes
+    minutesString
 }
 
-function drawPoint (context, x, y) {
+function drawPoint(context: CanvasRenderingContext2D, x: number, y: number) {
   context.fillRect(x, y, 2, 2) // point as 2 by 2 cube
 }
 
-function drawBackgroud (context, x, y, width, height) {
+function drawBackgroud(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
   context.fillStyle = 'white'
   context.fillRect(x, y, width, height)
 }
 
-function canvasPlot (points, counts, yOffset, context, plotSizes, plotTitle, timeStamp) {
+function canvasPlot (points: string | any[], counts: { [x: string]: any }, yOffset: number, context: CanvasRenderingContext2D, plotSizes: PlotSizes, plotTitle: string, timeStamp: any) {
   const invertedYCorrection = yOffset + plotSizes.height - plotSizes.marginBottom
   const tickLabelOffset = 5
   const axisWidth = 1
@@ -134,17 +154,17 @@ function canvasPlot (points, counts, yOffset, context, plotSizes, plotTitle, tim
   context.fillText(counts['-1'], rightTickLabelX, ncScoreY)
 }
 
-function addPlotFooter (context, footer, x, y) {
+function addPlotFooter(context: CanvasRenderingContext2D, footer: string, x: number, y: number) {
   context.fillText(footer, x, y)
 }
 
-function calculateXScaleCoefficient (width, paddingLeft, paddingRight, maxPosition) {
+function calculateXScaleCoefficient(width: number, paddingLeft: number, paddingRight: number, maxPosition: number) {
   return (width - paddingLeft - paddingRight) / maxPosition
 }
 
-function plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome, timeStamp, context, yOffset) {
+function plotIdentityByDecent(data: any, dataIndex: DataIndex, plotSizes: PlotSizes, selectedChromosome: any, timeStamp: any, context: any, yOffset: number) {
   const dataIndexKeys = Object.keys(dataIndex)
-  for (let plotId of dataIndexKeys) {
+  for (const plotId of dataIndexKeys) {
     const geneColumnNr1 = dataIndex[plotId].gPosColumnNr1
     const geneColumnNr2 = dataIndex[plotId].gPosColumnNr2
     const plotTitle = `Chromosome ${selectedChromosome}: ${plotId} (${geneColumnNr1}-${geneColumnNr2})`
@@ -153,15 +173,16 @@ function plotIdentityByDecent (data, dataIndex, plotSizes, selectedChromosome, t
   }
 }
 
-function roundRect (context, x, y, width, height, radius, evenOrOdd) {
+function roundRect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: any, evenOrOdd: string) {
   if (typeof radius === 'undefined') {
     radius = 5
   }
   if (typeof radius === 'number') {
     radius = {tl: radius, tr: radius, br: radius, bl: radius}
   } else {
-    let defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0}
-    for (let side in defaultRadius) {
+    const defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0}
+    for (const side in defaultRadius) {
+      // @ts-ignore
       radius[side] = radius[side] || defaultRadius[side]
     }
   }
@@ -183,11 +204,11 @@ function roundRect (context, x, y, width, height, radius, evenOrOdd) {
   context.stroke()
 }
 
-function addChromosomeBandLabel (context, bandLabel, x, y) {
+function addChromosomeBandLabel(context: CanvasRenderingContext2D, bandLabel: string, x: number, y: number) {
   context.fillText(bandLabel, x, y)
 }
 
-function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, labelYPosition, x, bandLabel) {
+function drawChromosomeBand(context: CanvasRenderingContext2D, plotSizes: PlotSizes, bandWidth: number, evenOrOdd: string, labelYPosition: number, x: number, bandLabel:string) {
   context.fillStyle = 'black'
   context.strokeRect(x, plotSizes.marginTop, bandWidth, plotSizes.chromosomeBarHeight)
   if (evenOrOdd === 'odd') {
@@ -198,7 +219,7 @@ function drawChromosomeBand (context, plotSizes, bandWidth, evenOrOdd, labelYPos
 
 // Position of band-labels based on %2 and %4
 // even -> below the chromosome, %4 == 0 low, else high; odd -> above the chromosome , %4 == 1 low, else high
-const getLabelPosition = (value, margin) => {
+const getLabelPosition = (value: number, margin: number) => {
   if (value % 2 === 0) {
     return value % 4 === 0 ? margin * 2.1 - 60 : margin * 2.1 - 50
   } else {
@@ -207,17 +228,17 @@ const getLabelPosition = (value, margin) => {
 }
 
 // Color of chromosome bands in the canvas is based on even (white) or odd index (black)
-const isEvenOrOdd = (value) => value % 2 === 0 ? 'even' : 'odd'
+const isEvenOrOdd = (value: number) => value % 2 === 0 ? 'even' : 'odd'
 
-function plotChromosome (plotSizes, selectedChromosome, context) {
+function plotChromosome(plotSizes: PlotSizes, selectedChromosome: string, context: CanvasRenderingContext2D) {
   const chromosomeData = chromosomePositions.getChromosomeData(selectedChromosome)
   const centerPosition = chromosomePositions.chromosomeCentromere(selectedChromosome)
   const leftRadius = {tl: plotSizes.chromosomeBarRadius, bl: plotSizes.chromosomeBarRadius}
   const rightRadius = {tr: plotSizes.chromosomeBarRadius, br: plotSizes.chromosomeBarRadius}
 
   chromosomeData.map(function (band, i) {
-    let startX = plotSizes.plotXStart + band[0] * plotSizes.xScale
-    let bandWidth = (band[1] - band[0]) * plotSizes.xScale
+    const startX = plotSizes.plotXStart + band[0] * plotSizes.xScale
+    const bandWidth = (band[1] - band[0]) * plotSizes.xScale
     const bandLabel = band[2]
     const evenOrOdd = isEvenOrOdd(i)
     const labelPosition = getLabelPosition(i, plotSizes.marginTop)
@@ -235,22 +256,26 @@ function plotChromosome (plotSizes, selectedChromosome, context) {
   })
 }
 
-const calculateCanvasWidth = (plotSizes) => plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
+const calculateCanvasWidth = (plotSizes: PlotSizes) => plotSizes.width + plotSizes.marginLeft + plotSizes.marginRight
 
-const calculateCanvasHeight = (plotSizes, yOffset, numberOfCombinations) => yOffset + (plotSizes.height + plotSizes.marginBottom) * numberOfCombinations
+const calculateCanvasHeight = (plotSizes: { height: any; marginBottom: any }, yOffset: number, numberOfCombinations: number) => yOffset + (plotSizes.height + plotSizes.marginBottom) * numberOfCombinations
 
-function plot (data, dataIndex, plotSizes, selectedChromosome, plotFunction) {
+function plot(data: any, dataIndex: any, plotSizes: PlotSizes, selectedChromosome: string, plotFunction: any) {
+  // @ts-ignore
   plotSizes.xScale = calculateXScaleCoefficient(plotSizes.width, plotSizes.paddingLeft, plotSizes.paddingRight, maxPositionMap[selectedChromosome])
   const numberOfCombinations = Object.keys(dataIndex).length
   const timeStamp = buildTimeStamp()
   plotSizes.plotXStart = plotSizes.marginLeft + plotSizes.paddingLeft
   plotSizes.plotXEnd = plotSizes.plotXStart + (plotSizes.width - plotSizes.paddingLeft - plotSizes.paddingRight)
   const canvas = document.getElementById('plot-canvas')
-  let yOffset = 120
+  const yOffset = 120
   const canvasWidth = calculateCanvasWidth(plotSizes)
   const canvasHeight = calculateCanvasHeight(plotSizes, yOffset, numberOfCombinations)
+  // @ts-ignore
   canvas.height = canvasHeight
+  // @ts-ignore
   canvas.width = canvasWidth
+  // @ts-ignore
   const context = canvas.getContext('2d')
   drawBackgroud(context, 0, 0, canvasWidth, canvasHeight)
   plotChromosome(plotSizes, selectedChromosome, context)

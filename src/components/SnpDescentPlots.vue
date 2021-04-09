@@ -79,23 +79,16 @@
   </div>
 </template>
 
-<script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+<script>
 import Vue from 'vue';
-// @ts-ignore
 import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
-// @ts-ignore
 import lineReader from '../service/lineReader'
-// @ts-ignore
 import identityByDecent from '../service/identityByDecent'
-// @ts-ignore
 import plotter from '../service/plotter'
-// @ts-ignore
 import dataDefinition from '../service/dataDefinition'
-// @ts-ignore
 import browser from 'browser-detect'
 
-export default Vue.extend({
+export default {
   name: 'SnpDescentPlots',
   data: function () {
       return {
@@ -112,7 +105,7 @@ export default Vue.extend({
       }
     },
     created: function () {
-      // @ts-ignore
+    
       this.plotSizes = {
         height: 250,
         width: 1075,
@@ -128,11 +121,11 @@ export default Vue.extend({
         chromosomeBarHeight: 25,
         chromosomeBarRadius: 12
       }
-      // @ts-ignore
+    
       this.results = {}
     },
     methods: {
-      onDefinitionFileInputChanged (event: any) {
+      onDefinitionFileInputChanged (event) {
         this.clear()
         const file = event.target.files[0]
         if (file) {
@@ -149,7 +142,7 @@ export default Vue.extend({
           this.hasDefFile = false
         }
       },
-      onDataFileInputChanged (event: any) {
+      onDataFileInputChanged (event) {
         this.clear()
         this.dataFile = event.target.files[0]
       },
@@ -178,10 +171,10 @@ export default Vue.extend({
         this.status = ''
         this.alertClass = 'alert alert-primary'
       },
-      isSelectedChromosome (columns: any) {
+      isSelectedChromosome (columns) {
         return columns[1] === this.selectedChromosome
       },
-      handleError (error: any) {
+      handleError (error) {
         if (error.startsWith('[Invalid data]')) {
           console.error('[Mismatch Error] Definition file does not match data columns')
           this.status = 'Error! Does your data file match the definition file?'
@@ -201,7 +194,7 @@ export default Vue.extend({
        * Return true in case of successful processing of line to keep on reading.
        * Return false to indicate error and stop the read of the data file.
        **/
-      forEachLine (line: any) {
+      forEachLine (line) {
         const columns = line.split('\t')
         let isSuccess = true
         if (this.isSelectedChromosome(columns)) {
@@ -213,9 +206,9 @@ export default Vue.extend({
             const id2 = columns[index2]
             const alleleScore = identityByDecent.computeScore(id1, id2)
             // The alleleScore is equal to the key in the counts object
-            // @ts-ignore
+          
             this.results[combination].counts[alleleScore] += 1
-            // @ts-ignore
+          
             this.results[combination].points.push([parseInt(columns[2]), alleleScore])
           }
         } else if (columns[0] === 'Name') {
@@ -224,11 +217,9 @@ export default Vue.extend({
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           const combinations = Object.keys(parsedDefData)
           for (let combination of combinations) {
-            // @ts-ignore
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
               isSuccess = false
             } else {
-              // @ts-ignore
               this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
             }
           }
@@ -238,9 +229,9 @@ export default Vue.extend({
       onComplete () {
         this.t1 = performance.now()
         const plotFunction = plotter.plotIdentityByDecent
-        // @ts-ignore
+      
         plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
-        // @ts-ignore
+      
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
@@ -259,24 +250,24 @@ export default Vue.extend({
          * this function needs the execute in the context of the click event
          * @param link
          */
-        function downloadCanvas (link: HTMLElement) {
+        function downloadCanvas (link) {
           const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
           const fileName = `${timestamp}.png`
           const canvas = document.getElementById('plot-canvas')
           if (!isInternetExplorer) {
             // non ie can use simple and fast method
-            // @ts-ignore
+          
             link.href = canvas.toDataURL()
-            // @ts-ignore
+          
             link.download = fileName
           } else {
             // ie needs to use blob as intermediate
-            // @ts-ignore
+          
             let blob = canvas.msToBlob()
             window.navigator.msSaveBlob(blob, fileName)
           }
         }
-        // @ts-ignore
+      
         document.getElementById('download-btn').addEventListener('click', function () {
           downloadCanvas(this)
         }, false)
@@ -284,14 +275,14 @@ export default Vue.extend({
     },
     computed: {
       disableProcess: function () {
-        // @ts-ignore
+      
         return !(this.dataFile && this.hasDefFile)
       }
     },
     mounted: function () {
       this.setDownLoadClickHandler()
     }
-  });
+  }
 </script>
 
 
