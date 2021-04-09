@@ -1,5 +1,5 @@
 {
-  "name": "snp-visualization",
+  "name": "@molgenis-ui/snp-visualization",
   "version": "1.0.0",
   "description": "A Vue project using Canvas to create identity by descent plots",
   "contributors": [
