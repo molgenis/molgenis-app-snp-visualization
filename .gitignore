@@ -4,3 +4,4 @@ dist/assets
 npm-debug.log
 test/unit/coverage
 .idea/
+dist/

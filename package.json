@@ -16,13 +16,22 @@
       "email": "markdehaan90@gmail.com"
     }
   ],
-  "private": true,
+  "license": "LGPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.html",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "postversion": "vue-cli-service build"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "dependencies": {
     "@molgenis/molgenis-api-client": "^3.1.4",
     "bootstrap": "4",
@@ -35,6 +44,8 @@
     "vuex": "^3.4.0"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "@types/jest": "^24.0.19",
     "@types/jquery": "^1.9",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
@@ -50,7 +61,23 @@
     "@vue/test-utils": "^1.0.3",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "semantic-release": "^17.4.2",
     "typescript": "~4.1.5",
     "vue-template-compiler": "^2.6.11"
+  },
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      "@semantic-release/npm",
+      "@semantic-release/git",
+      "@semantic-release/github"
+    ]
   }
 }
