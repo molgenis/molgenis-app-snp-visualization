@@ -1,4 +1,4 @@
-import jquery from 'jquery-slim'
+import jquery from 'jquery'
 import chromosomePositions from './chromosomePositions'
 // const arc = 2 * Math.PI
 

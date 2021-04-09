@@ -1,5 +1,5 @@
 <template>
-  <div>
+<div>
     <div class="row">
 
       <div class="col">
@@ -56,7 +56,7 @@
                 :disabled="disableProcess">Process data
         </button>
 
-        <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad"
+        <a id="download-btn" class="btn btn-primary ml-1" href="#" role="button" :disabled="!isReadyToDownLoad"
            v-bind:class="{ disabled: !isReadyToDownLoad }">
           <i class="fa fa-download" aria-hidden="true"></i>
         </a>
@@ -64,7 +64,7 @@
 
       <div id="status" class="col-md-4 text-center">
         <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert">
-          <small><i><span v-model="status"> {{status}} </span></i></small>
+          <small><i><span v-show="status"> {{status}} </span></i></small>
           <i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i>
         </div>
       </div>
@@ -79,17 +79,25 @@
   </div>
 </template>
 
-<script>
-  import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
-  import lineReader from '../service/lineReader'
-  import identityByDecent from '../service/identityByDecent'
-  import plotter from '../service/plotter'
-  import dataDefinition from '../service/dataDefinition'
-  import browser from 'browser-detect'
+<script lang="ts">
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import Vue from 'vue';
+// @ts-ignore
+import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
+// @ts-ignore
+import lineReader from '../service/lineReader'
+// @ts-ignore
+import identityByDecent from '../service/identityByDecent'
+// @ts-ignore
+import plotter from '../service/plotter'
+// @ts-ignore
+import dataDefinition from '../service/dataDefinition'
+// @ts-ignore
+import browser from 'browser-detect'
 
-  export default {
-    name: 'snp-descent-plot',
-    data: function () {
+export default Vue.extend({
+  name: 'SnpDescentPlots',
+  data: function () {
       return {
         isDisplayPlots: false,
         isReadyToDownLoad: false,
@@ -104,6 +112,7 @@
       }
     },
     created: function () {
+      // @ts-ignore
       this.plotSizes = {
         height: 250,
         width: 1075,
@@ -119,14 +128,16 @@
         chromosomeBarHeight: 25,
         chromosomeBarRadius: 12
       }
+      // @ts-ignore
       this.results = {}
     },
     methods: {
-      onDefinitionFileInputChanged (event) {
+      onDefinitionFileInputChanged (event: any) {
         this.clear()
         const file = event.target.files[0]
         if (file) {
           this.hasDefFile = true
+          // eslint-disable-next-line @typescript-eslint/no-this-alias
           const self = this
           const reader = new FileReader()
           reader.onload = function () {
@@ -138,7 +149,7 @@
           this.hasDefFile = false
         }
       },
-      onDataFileInputChanged (event) {
+      onDataFileInputChanged (event: any) {
         this.clear()
         this.dataFile = event.target.files[0]
       },
@@ -167,10 +178,10 @@
         this.status = ''
         this.alertClass = 'alert alert-primary'
       },
-      isSelectedChromosome (columns) {
+      isSelectedChromosome (columns: any) {
         return columns[1] === this.selectedChromosome
       },
-      handleError (error) {
+      handleError (error: any) {
         if (error.startsWith('[Invalid data]')) {
           console.error('[Mismatch Error] Definition file does not match data columns')
           this.status = 'Error! Does your data file match the definition file?'
@@ -190,7 +201,7 @@
        * Return true in case of successful processing of line to keep on reading.
        * Return false to indicate error and stop the read of the data file.
        **/
-      forEachLine (line) {
+      forEachLine (line: any) {
         const columns = line.split('\t')
         let isSuccess = true
         if (this.isSelectedChromosome(columns)) {
@@ -202,7 +213,9 @@
             const id2 = columns[index2]
             const alleleScore = identityByDecent.computeScore(id1, id2)
             // The alleleScore is equal to the key in the counts object
+            // @ts-ignore
             this.results[combination].counts[alleleScore] += 1
+            // @ts-ignore
             this.results[combination].points.push([parseInt(columns[2]), alleleScore])
           }
         } else if (columns[0] === 'Name') {
@@ -211,9 +224,11 @@
           this.$store.commit(SET_DATA_INDEX, dataIndex)
           const combinations = Object.keys(parsedDefData)
           for (let combination of combinations) {
+            // @ts-ignore
             if (dataIndex[combination].gPos1 === -1 || dataIndex[combination].gPos2 === -1) {
               isSuccess = false
             } else {
+              // @ts-ignore
               this.results[combination] = {'counts': {1: 0, 2: 0, 0: 0, '-1': 0}, 'points': []}
             }
           }
@@ -223,7 +238,9 @@
       onComplete () {
         this.t1 = performance.now()
         const plotFunction = plotter.plotIdentityByDecent
+        // @ts-ignore
         plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
+        // @ts-ignore
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
@@ -238,26 +255,28 @@
       setDownLoadClickHandler () {
         const currentBrowser = browser()
         const isInternetExplorer = currentBrowser.name === 'edge' || currentBrowser.name === 'ie'
-
         /**
          * this function needs the execute in the context of the click event
          * @param link
          */
-        function downloadCanvas (link) {
+        function downloadCanvas (link: HTMLElement) {
           const timestamp = plotter.buildTimeStamp().replace(/ /g, '_')
           const fileName = `${timestamp}.png`
           const canvas = document.getElementById('plot-canvas')
           if (!isInternetExplorer) {
             // non ie can use simple and fast method
+            // @ts-ignore
             link.href = canvas.toDataURL()
+            // @ts-ignore
             link.download = fileName
           } else {
             // ie needs to use blob as intermediate
+            // @ts-ignore
             let blob = canvas.msToBlob()
             window.navigator.msSaveBlob(blob, fileName)
           }
         }
-
+        // @ts-ignore
         document.getElementById('download-btn').addEventListener('click', function () {
           downloadCanvas(this)
         }, false)
@@ -265,11 +284,19 @@
     },
     computed: {
       disableProcess: function () {
+        // @ts-ignore
         return !(this.dataFile && this.hasDefFile)
       }
     },
     mounted: function () {
       this.setDownLoadClickHandler()
     }
-  }
+  });
 </script>
+
+
+<style scoped>
+input[type=file] {
+  min-height: 2.6rem;
+}
+</style>
