@@ -13,7 +13,7 @@ pipeline {
                 container('vault') {
                     script {
                         env.GITHUB_TOKEN = sh(script: 'vault read -field=value secret/ops/token/github', returnStdout: true)
-                        // env.CODECOV_TOKEN = sh(script: 'vault read -field=@molgenis-ui/snp-visualization secret/ops/token/codecov', returnStdout: true)
+                        env.CODECOV_TOKEN = sh(script: 'vault read -field=molgenis-app-snp-visualization secret/ops/token/codecov', returnStdout: true)
                         env.NPM_TOKEN = sh(script: 'vault read -field=value secret/ops/token/npm', returnStdout: true)
                     }
                 }
@@ -30,13 +30,13 @@ pipeline {
                     sh "yarn test:unit"
                 }
             }
-            // post {
-            //     always {
-            //         container('node') {
-            //             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-            //         }
-            //     }
-            // }
+            post {
+                always {
+                    container('node') {
+                        sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
+                    }
+                }
+            }
         }
         stage('Install, test and build: [ master ]') {
             when {
@@ -53,13 +53,13 @@ pipeline {
                     sh "yarn build"
                 }
             }
-            // post {
-            //     always {
-            //         container('node') {
-            //             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-            //         }
-            //     }
-            // }
+            post {
+                always {
+                    container('node') {
+                        sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
+                    }
+                }
+            }
         }
         stage('Release: [ master ]') {
             when {
