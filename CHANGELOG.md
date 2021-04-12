@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/molgenis/molgenis-app-snp-visualization/compare/v1.0.0...v1.0.1) (2021-04-12)
+
+
+### Bug Fixes
+
+* configure public path ([#30](https://github.com/molgenis/molgenis-app-snp-visualization/issues/30)) ([40d70cf](https://github.com/molgenis/molgenis-app-snp-visualization/commit/40d70cfe928cba400e08f32a40c354b2b6affe25))
+
 # 1.0.0 (2021-04-12)
 
 
