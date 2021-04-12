@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/molgenis/molgenis-app-snp-visualization/compare/v1.0.1...v1.0.2) (2021-04-12)
+
+
+### Bug Fixes
+
+* no proxy route refs ([#31](https://github.com/molgenis/molgenis-app-snp-visualization/issues/31)) ([fbef675](https://github.com/molgenis/molgenis-app-snp-visualization/commit/fbef675a1ee63823311e3f19587e84b1b3e7a3b0))
+
 ## [1.0.1](https://github.com/molgenis/molgenis-app-snp-visualization/compare/v1.0.0...v1.0.1) (2021-04-12)
 
 
