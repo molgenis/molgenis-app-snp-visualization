@@ -25,8 +25,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint",
-    "postversion": "vue-cli-service build"
+    "lint": "vue-cli-service lint"
   },
   "files": [
     "dist",
