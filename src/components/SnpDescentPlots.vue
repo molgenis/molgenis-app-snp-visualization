@@ -1,5 +1,5 @@
 <template>
-  <div>
+<div>
     <div class="row">
 
       <div class="col">
@@ -56,7 +56,7 @@
                 :disabled="disableProcess">Process data
         </button>
 
-        <a id="download-btn" class="btn btn-primary" href="#" role="button" :disabled="!isReadyToDownLoad"
+        <a id="download-btn" class="btn btn-primary ml-1" href="#" role="button" :disabled="!isReadyToDownLoad"
            v-bind:class="{ disabled: !isReadyToDownLoad }">
           <i class="fa fa-download" aria-hidden="true"></i>
         </a>
@@ -64,7 +64,7 @@
 
       <div id="status" class="col-md-4 text-center">
         <div id="statusUpdate" v-bind:class="alertClass" v-if="status" role="alert">
-          <small><i><span v-model="status"> {{status}} </span></i></small>
+          <small><i><span v-show="status"> {{status}} </span></i></small>
           <i class="fa fa-spinner fa-pulse fa-fw" v-if="isLoading"></i>
         </div>
       </div>
@@ -80,16 +80,17 @@
 </template>
 
 <script>
-  import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
-  import lineReader from '../service/lineReader'
-  import identityByDecent from '../service/identityByDecent'
-  import plotter from '../service/plotter'
-  import dataDefinition from '../service/dataDefinition'
-  import browser from 'browser-detect'
+import Vue from 'vue';
+import { SET_PARSED_DEF_OBJ, SET_DATA_INDEX } from '../store/mutations'
+import lineReader from '../service/lineReader'
+import identityByDecent from '../service/identityByDecent'
+import plotter from '../service/plotter'
+import dataDefinition from '../service/dataDefinition'
+import browser from 'browser-detect'
 
-  export default {
-    name: 'snp-descent-plot',
-    data: function () {
+export default {
+  name: 'SnpDescentPlots',
+  data: function () {
       return {
         isDisplayPlots: false,
         isReadyToDownLoad: false,
@@ -104,6 +105,7 @@
       }
     },
     created: function () {
+    
       this.plotSizes = {
         height: 250,
         width: 1075,
@@ -119,6 +121,7 @@
         chromosomeBarHeight: 25,
         chromosomeBarRadius: 12
       }
+    
       this.results = {}
     },
     methods: {
@@ -127,6 +130,7 @@
         const file = event.target.files[0]
         if (file) {
           this.hasDefFile = true
+          // eslint-disable-next-line @typescript-eslint/no-this-alias
           const self = this
           const reader = new FileReader()
           reader.onload = function () {
@@ -202,7 +206,9 @@
             const id2 = columns[index2]
             const alleleScore = identityByDecent.computeScore(id1, id2)
             // The alleleScore is equal to the key in the counts object
+          
             this.results[combination].counts[alleleScore] += 1
+          
             this.results[combination].points.push([parseInt(columns[2]), alleleScore])
           }
         } else if (columns[0] === 'Name') {
@@ -223,7 +229,9 @@
       onComplete () {
         this.t1 = performance.now()
         const plotFunction = plotter.plotIdentityByDecent
+      
         plotter.plot(this.results, this.$store.state.dataIndex, this.plotSizes, this.selectedChromosome, plotFunction)
+      
         this.results = {}
         this.isLoading = false
         this.isReadyToDownLoad = true
@@ -238,7 +246,6 @@
       setDownLoadClickHandler () {
         const currentBrowser = browser()
         const isInternetExplorer = currentBrowser.name === 'edge' || currentBrowser.name === 'ie'
-
         /**
          * this function needs the execute in the context of the click event
          * @param link
@@ -249,15 +256,18 @@
           const canvas = document.getElementById('plot-canvas')
           if (!isInternetExplorer) {
             // non ie can use simple and fast method
+          
             link.href = canvas.toDataURL()
+          
             link.download = fileName
           } else {
             // ie needs to use blob as intermediate
+          
             let blob = canvas.msToBlob()
             window.navigator.msSaveBlob(blob, fileName)
           }
         }
-
+      
         document.getElementById('download-btn').addEventListener('click', function () {
           downloadCanvas(this)
         }, false)
@@ -265,6 +275,7 @@
     },
     computed: {
       disableProcess: function () {
+      
         return !(this.dataFile && this.hasDefFile)
       }
     },
@@ -273,3 +284,10 @@
     }
   }
 </script>
+
+
+<style scoped>
+input[type=file] {
+  min-height: 2.6rem;
+}
+</style>
